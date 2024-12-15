@@ -1,0 +1,40 @@
+name: VB.NET Build Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.x'  # 必要に応じて、VB.NETに適したバージョンに変更
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the project
+      run: dotnet build --configuration Release
+
+    - name: Run tests (optional)
+      run: dotnet test --configuration Release
+
+    - name: Publish the project
+      run: dotnet publish --configuration Release --output ./output
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: MyApp
+        path: ./output
