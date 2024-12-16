@@ -1,0 +1,77 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main # mainブランチの変更でトリガーされる
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    # リポジトリをチェックアウト
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    # .NETのセットアップ
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x' # 必要に応じて変更
+
+    # 依存関係の復元
+    - name: Restore dependencies
+      run: dotnet restore
+
+    # プロジェクトのビルド
+    - name: Build the project
+      run: dotnet build --configuration Release
+
+    # プロジェクトのパブリッシュ
+    - name: Publish the project
+      run: dotnet publish --configuration Release --output ./output
+
+    # ZIPファイルの作成
+    - name: Create ZIP file
+      run: |
+        VERSION=$(date +"%Y%m%d")
+        COUNTER=001
+        ZIP_NAME="VSD-VRChatScreenshotDiscord_V${VERSION}_${COUNTER}.zip"
+        while [ -e "./output/$ZIP_NAME" ]; do
+          COUNTER=$(printf "%03d" $((10#$COUNTER + 1)))
+          ZIP_NAME="VSD-VRChatScreenshotDiscord_V${VERSION}_${COUNTER}.zip"
+        done
+        zip -r "./output/$ZIP_NAME" ./output/*
+
+    # リリースノート生成
+    - name: Generate Release Notes
+      id: release_notes
+      run: |
+        echo "## Release Notes" > release_notes.md
+        echo "Version: V${{ github.sha }}" >> release_notes.md
+        echo "Changes:" >> release_notes.md
+        git log -1 --pretty=format:"%h - %s (%an, %ar)" >> release_notes.md
+
+    # リリース作成
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: "v${{ github.sha }}" # タグ名はコミットSHAに基づく
+        release_name: "Release V${{ github.sha }}"
+        body: ${{ steps.release_notes.outputs.notes }}
+        draft: false
+        prerelease: false
+
+    # ZIPファイルをリリースにアップロード
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./output/*.zip
+        asset_name: VSD-VRChatScreenshotDiscord.zip
+        asset_content_type: application/zip
