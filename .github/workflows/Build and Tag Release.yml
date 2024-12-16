@@ -1,0 +1,50 @@
+name: Build and Tag Release
+
+on:
+  push:
+    tags:
+      - 'v*' # "v"で始まるタグがプッシュされたときにトリガー
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.x' # 必要に応じて変更
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the project
+      run: dotnet build --configuration Release
+
+    - name: Publish the project
+      run: dotnet publish --configuration Release --output ./output
+
+    - name: Upload Release Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Release-Package
+        path: ./output
+
+  tag:
+    runs-on: ubuntu-latest
+    needs: build # ビルドが成功した場合のみ実行
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Create and Push Tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG_NAME=$(date +"v%Y%m%d%H%M%S") # タグをタイムスタンプで作成
+        git tag $TAG_NAME
+        git push origin $TAG_NAME
