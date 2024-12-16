@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - main # mainブランチの変更でトリガーされる
+      - master # masterブランチの変更でトリガーされる
 
 jobs:
   build-and-release:
