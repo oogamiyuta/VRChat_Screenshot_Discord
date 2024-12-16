@@ -38,7 +38,8 @@ jobs:
           $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-        echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV
+        echo "::set-output name=zip_path::./output/$ZIP_NAME"
+      shell: pwsh
 
     - name: Create GitHub Release
       id: create_release
@@ -60,6 +61,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.ZIP_PATH }}
+        asset_path: ${{ steps.create_zip.outputs.zip_path }}
         asset_name: VSD-VRChatScreenshotDiscord.zip
         asset_content_type: application/zip
