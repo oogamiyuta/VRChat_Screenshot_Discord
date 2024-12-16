@@ -40,8 +40,9 @@ jobs:
           $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-        echo "::set-output name=zip_path::./output/$ZIP_NAME"
-        echo "::set-output name=version::V$VERSION"
+        echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV
+        echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+        echo "VERSION=V$VERSION" >> $GITHUB_ENV
       shell: pwsh
 
     - name: Create GitHub Release
@@ -50,11 +51,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ steps.create_zip.outputs.version }}
-        release_name: Release ${{ steps.create_zip.outputs.version }}
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
         body: |
           **Release Notes**
-          - Version: ${{ steps.create_zip.outputs.version }}
+          - Version: ${{ env.VERSION }}
           - Changes:
             - Improved stability.
             - Fixed known issues.
@@ -67,6 +68,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.create_zip.outputs.zip_path }}
-        asset_name: ${{ steps.create_zip.outputs.zip_path | basename }}
+        asset_path: ${{ env.ZIP_PATH }}
+        asset_name: ${{ env.ZIP_NAME }}
         asset_content_type: application/zip
