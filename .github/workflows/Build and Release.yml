@@ -34,6 +34,7 @@ jobs:
 
     # ZIPファイルの作成
     - name: Create ZIP file
+      shell: bash # Bashを明示的に使用
       run: |
         VERSION=$(date +"%Y%m%d")
         COUNTER=001
@@ -43,6 +44,7 @@ jobs:
           ZIP_NAME="VSD-VRChatScreenshotDiscord_V${VERSION}_${COUNTER}.zip"
         done
         zip -r "./output/$ZIP_NAME" ./output/*
+
 
     # リリースノート生成
     - name: Generate Release Notes
