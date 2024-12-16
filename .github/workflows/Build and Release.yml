@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - master  # 必要に応じて main に変更
+      - master
 
 jobs:
   build-and-release:
@@ -28,7 +28,7 @@ jobs:
       run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
 
     - name: Create ZIP file
-      id: create_zip  # IDを追加
+      id: create_zip
       run: |
         $VERSION = (Get-Date -Format "yyyyMMdd")
         $COUNTER = 1
@@ -38,7 +38,7 @@ jobs:
           $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-        echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV  # ZIPファイルのパスを環境変数に設定
+        echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV
 
     - name: Create GitHub Release
       id: create_release
@@ -60,6 +60,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.ZIP_PATH }}  # 生成されたZIPファイルのパスを使用
+        asset_path: ${{ env.ZIP_PATH }}
         asset_name: VSD-VRChatScreenshotDiscord.zip
         asset_content_type: application/zip
