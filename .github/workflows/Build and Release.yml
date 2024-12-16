@@ -34,16 +34,15 @@ jobs:
 
     # ZIPファイルの作成
     - name: Create ZIP file
-      shell: bash # Bashを明示的に使用
       run: |
-        VERSION=$(date +"%Y%m%d")
-        COUNTER=001
-        ZIP_NAME="VSD-VRChatScreenshotDiscord_V${VERSION}_${COUNTER}.zip"
-        while [ -e "./output/$ZIP_NAME" ]; do
-          COUNTER=$(printf "%03d" $((10#$COUNTER + 1)))
-          ZIP_NAME="VSD-VRChatScreenshotDiscord_V${VERSION}_${COUNTER}.zip"
-        done
-        zip -r "./output/$ZIP_NAME" ./output/*
+        $VERSION = (Get-Date -Format "yyyyMMdd")
+        $COUNTER = 1
+        $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+        while (Test-Path "./output/$ZIP_NAME") {
+          $COUNTER++
+          $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+        }
+        Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
 
 
     # リリースノート生成
