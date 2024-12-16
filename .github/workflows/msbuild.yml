@@ -1,13 +1,13 @@
 name: VB.NET Build Workflow
-on: workflow_dispatch
+
+on:
+  workflow_dispatch:
   push:
     branches:
       - main
   pull_request:
     branches:
       - main
-  branch_protection_rule:
-    types: [created, deleted]
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
     - name: Set up .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x'  # 必要に応じて、VB.NETに適したバージョンに変更
+        dotnet-version: '8.0.x'  # 必要に応じて変更
 
     - name: Restore dependencies
       run: dotnet restore
