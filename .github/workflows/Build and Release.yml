@@ -39,18 +39,8 @@ jobs:
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
         echo "ZIP file created: ./output/$ZIP_NAME"
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./output/*.zip  # Make sure the file path is correct
-        asset_name: VSD-VRChatScreenshotDiscord.zip
-        asset_content_type: application/zip
-
     - name: Create GitHub Release
-      id: create_release
+      id: create_release  # IDを付けて出力を参照
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +58,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./output/*.zip
+        upload_url: ${{ steps.create_release.outputs.upload_url }}  # create_release ステップの出力を使用
+        asset_path: ./output/*.zip  # ZIPファイルのパス
         asset_name: VSD-VRChatScreenshotDiscord.zip
         asset_content_type: application/zip
