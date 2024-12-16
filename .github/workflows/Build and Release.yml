@@ -51,7 +51,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.VERSION }} # 修正: tag_name を設定
+        tag_name: ${{ env.VERSION }} # 正しく VERSION を指定
         release_name: Release ${{ env.VERSION }}
         body: |
           **Release Notes**
