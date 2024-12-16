@@ -34,5 +34,5 @@ VRChatで撮影された画像を自動的にDiscordへ送信します。
 
 次回からは起動時に読み込まれるので設定はいらないです。
 
-#プレビュー
+# プレビュー
 ![image](https://github.com/user-attachments/assets/6c79ad39-51d9-484f-b290-b30941d62e54)
