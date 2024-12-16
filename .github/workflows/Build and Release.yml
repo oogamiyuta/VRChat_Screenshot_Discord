@@ -27,18 +27,21 @@ jobs:
     - name: Publish the project
       run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
 
-    - name: Create ZIP file
+    - name: Generate version and create ZIP file
       id: create_zip
       run: |
-        $VERSION = (Get-Date -Format "yyyyMMdd")
+        $VERSION_DATE = (Get-Date -Format "yyyyMMdd")
         $COUNTER = 1
-        $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+        $VERSION = "$VERSION_DATE_{0:D3}" -f $COUNTER
+        $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         while (Test-Path "./output/$ZIP_NAME") {
           $COUNTER++
-          $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+          $VERSION = "$VERSION_DATE_{0:D3}" -f $COUNTER
+          $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
         echo "::set-output name=zip_path::./output/$ZIP_NAME"
+        echo "::set-output name=version::V$VERSION"
       shell: pwsh
 
     - name: Create GitHub Release
@@ -47,11 +50,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.sha }}
-        release_name: Release V${{ github.sha }}
+        tag_name: ${{ steps.create_zip.outputs.version }}
+        release_name: Release ${{ steps.create_zip.outputs.version }}
         body: |
           **Release Notes**
-          - Changes in this release.
+          - Version: ${{ steps.create_zip.outputs.version }}
+          - Changes:
+            - Improved stability.
+            - Fixed known issues.
         draft: false
         prerelease: false
 
@@ -62,5 +68,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.create_zip.outputs.zip_path }}
-        asset_name: VSD-VRChatScreenshotDiscord.zip
+        asset_name: ${{ steps.create_zip.outputs.zip_path | basename }}
         asset_content_type: application/zip
