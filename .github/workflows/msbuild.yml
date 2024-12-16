@@ -1,6 +1,5 @@
 name: VB.NET Build Workflow
 on: workflow_dispatch
-on:
   push:
     branches:
       - main
