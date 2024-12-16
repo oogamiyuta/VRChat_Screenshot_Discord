@@ -36,9 +36,9 @@ Partial Class Form1
         Label1.AutoSize = True
         Label1.Location = New Point(12, 9)
         Label1.Name = "Label1"
-        Label1.Size = New Size(60, 15)
+        Label1.Size = New Size(122, 15)
         Label1.TabIndex = 0
-        Label1.Text = "フォルダパス"
+        Label1.Text = "VRChat画像フォルダパス"
         ' 
         ' Label2
         ' 
@@ -75,7 +75,7 @@ Partial Class Form1
         ' 
         ' Button1
         ' 
-        Button1.Location = New Point(566, 46)
+        Button1.Location = New Point(574, 71)
         Button1.Name = "Button1"
         Button1.Size = New Size(75, 23)
         Button1.TabIndex = 5
