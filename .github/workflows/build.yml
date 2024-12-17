@@ -3,7 +3,7 @@ name: Build Project
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -26,7 +26,6 @@ jobs:
       - name: パッケージを作成
         shell: pwsh
         run: |
-          # バージョンと日付を使ったZIP名を生成
           $DATE = (Get-Date -Format "yyyyMMdd")
           $COUNTER = 1
           do {
@@ -35,16 +34,14 @@ jobs:
             $COUNTER++
           } while (Test-Path "./output/$ZIP_NAME")
 
-          # ZIPファイルを作成
           dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
           Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
 
-          # バージョンとZIP名を環境変数に設定
           echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
           echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
 
       - name: ZIPファイルをアーティファクトとして保存
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.ZIP_NAME }}
-          path: ./output/${{ env.ZIP_NAME }}
+          name: build-artifact
+          path: ./output

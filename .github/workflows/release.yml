@@ -2,7 +2,7 @@ name: Create Release
 
 on:
   workflow_run:
-    workflows: ["Build Project"] # 1つ目のワークフローが成功したら実行
+    workflows: ["Build Project"]
     types:
       - completed
 
@@ -17,23 +17,20 @@ jobs:
       - name: アーティファクトをダウンロード
         uses: actions/download-artifact@v3
         with:
-          name: VSD-VRChatScreenshotDiscord_*
+          name: build-artifact
           path: ./output
 
       - name: タグの作成
         shell: bash
         run: |
-          # アーティファクトのZIP名を取得
           ZIP_NAME=$(ls ./output/*.zip | xargs -n 1 basename)
           VERSION=$(echo $ZIP_NAME | sed 's/VSD-VRChatScreenshotDiscord_V\(.*\).zip/\1/')
 
-          # タグを作成してプッシュ
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git tag -a "$VERSION" -m "Version $VERSION"
           git push origin "$VERSION"
 
-          # 環境変数にバージョンを設定
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: GitHubリリースを作成
