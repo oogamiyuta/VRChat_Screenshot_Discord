@@ -46,7 +46,7 @@ jobs:
           name: build-artifact
           path: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*
 
-        name: タグの作成
+      - name: タグの作成
         shell: bash
         run: |
           
