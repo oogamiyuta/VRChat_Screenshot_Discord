@@ -1,4 +1,3 @@
-
 name: Build Project
 
 on:
@@ -23,6 +22,7 @@ jobs:
         run: |
           dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
           dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
+
       - name: パッケージを作成
         shell: pwsh
         run: |
@@ -30,29 +30,28 @@ jobs:
           $COUNTER = 1
           do {
             $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
-            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
+            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_$VERSION.zip"
             $COUNTER++
           } while (Test-Path "./output/$ZIP_NAME")
           dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
           Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-          echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
+          echo "VERSION=$VERSION" >> $env:GITHUB_ENV
           echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
+
       - name: ZIPファイルをアーティファクトとして保存
-        uses: thedoctor0/zip-release@main
+        uses: actions/upload-artifact@v3
         with:
-          type: 'zip'
-          filename: $env:GITHUB_ENV
-          directory: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output
+          name: ${{ env.ZIP_NAME }}
+          path: ./output/${{ env.ZIP_NAME }}
 
       - name: タグの作成
         shell: bash
         run: |
-          
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag -a "$VERSION" -m "Version $VERSION"
-          git push origin "$VERSION"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          git tag -a "${{ env.VERSION }}" -m "Version ${{ env.VERSION }}"
+          git push origin "${{ env.VERSION }}"
+
       - name: GitHubリリースを作成
         uses: actions/create-release@v1
         env:
@@ -71,11 +70,7 @@ jobs:
 
       - name: ZIPファイルをリリースにアップロード
         uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          allowUpdates: true
-          artifacts: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\$env:GITHUB_ENV
-          tag: "Version $VERSION"
-          # 事前に登録したtokenを使用
+          artifacts: ./output/${{ env.ZIP_NAME }}
+          tag: "${{ env.VERSION }}"
           token: ${{ secrets.RELEASE_TOKEN }}
