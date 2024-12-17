@@ -41,10 +41,11 @@ jobs:
           echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
 
       - name: ZIPファイルをアーティファクトとして保存
-        uses: actions/upload-artifact@v4
+        uses: thedoctor0/zip-release@main
         with:
-          name: build-artifact
-          path: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*
+          type: 'zip'
+          filename: $env:GITHUB_ENV
+          directory: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output
 
       - name: タグの作成
         shell: bash
@@ -74,11 +75,12 @@ jobs:
           prerelease: false
 
       - name: ZIPファイルをリリースにアップロード
-        uses: actions/upload-release-asset@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\
-          asset_name: $ZIP_NAME
-          asset_content_type: application/zip
+          allowUpdates: true
+          artifacts: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\$env:GITHUB_ENV
+          tag: ${{ env.tag_name }}
+          # 事前に登録したtokenを使用
+          token: ${{ secrets.RELEASE_TOKEN }}
