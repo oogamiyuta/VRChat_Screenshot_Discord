@@ -2,7 +2,7 @@ name: Create GitHub Release
 
 on:
   workflow_run:
-    workflows: ["Build and Create ZIP"]
+    workflows: ["Build"]
     types:
       - completed
 
