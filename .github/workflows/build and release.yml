@@ -23,64 +23,10 @@ jobs:
           dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
           dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
 
-      - name: パッケージを作成
-        shell: pwsh
-        run: |
-          $DATE = (Get-Date -Format "yyyyMMdd_HHmmss")
-          $COUNTER = 1
-          do {
-            $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
-            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
-            $COUNTER++
-          } while (Test-Path "./output/$ZIP_NAME")
-
-          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
-          Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-
-          echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
-          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
-
-      - name: ZIPファイルをアーティファクトとして保存
-        uses: thedoctor0/zip-release@main
+    
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          filename: $env:GITHUB_ENV
-          directory: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output
-
-      - name: タグの作成
-        shell: bash
-        run: |
-          
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag -a "$VERSION" -m "Version $VERSION"
-          git push origin "$VERSION"
-
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: GitHubリリースを作成
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.VERSION }}
-          release_name: リリース ${{ env.VERSION }}
-          body: |
-            **リリースノート**
-            - バージョン: **${{ env.VERSION }}**
-            - 変更点:
-              - 安定性が向上しました。
-              - 既知の問題を修正しました。
-          draft: false
-          prerelease: false
-
-      - name: ZIPファイルをリリースにアップロード
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          allowUpdates: true
-          artifacts: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\$env:GITHUB_ENV
-          tag: ${{ env.tag_name }}
-          # 事前に登録したtokenを使用
-          token: ${{ secrets.RELEASE_TOKEN }}
+          filename: 'release.zip'
+          exclusions: '*'
