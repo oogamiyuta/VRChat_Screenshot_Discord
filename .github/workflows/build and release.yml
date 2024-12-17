@@ -23,34 +23,16 @@ jobs:
           dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
           dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
 
-      - name: パッケージを作成
-        shell: pwsh
-        run: |
-          $DATE = (Get-Date -Format "yyyyMMdd_HHmmss")
-          $COUNTER = 1
-          do {
-            $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
-            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_$VERSION.zip"
-            $COUNTER++
-          } while (Test-Path "./output/$ZIP_NAME")
-          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
-          Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-          echo "VERSION=$VERSION" >> $env:GITHUB_ENV
-          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
-
-      - name: ZIPファイルをアーティファクトとして保存
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.ZIP_NAME }}
-          path: ./output/${{ env.ZIP_NAME }}
-
       - name: タグの作成
         shell: bash
         run: |
+          DATE=$(date +"%Y%m%d_%H%M%S")
+          VERSION="v${DATE}_001"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git tag -a "${{ env.VERSION }}" -m "Version ${{ env.VERSION }}"
-          git push origin "${{ env.VERSION }}"
+          git tag -a "$VERSION" -m "Version $VERSION"
+          git push origin "$VERSION"
 
       - name: GitHubリリースを作成
         uses: actions/create-release@v1
@@ -67,6 +49,13 @@ jobs:
               - 既知の問題を修正しました。
           draft: false
           prerelease: false
+
+      - name: パッケージを圧縮
+        shell: pwsh
+        run: |
+          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
+          Compress-Archive -Path ./output/* -DestinationPath "./output/VSD-VRChatScreenshotDiscord_${{ env.VERSION }}.zip"
+          echo "ZIP_NAME=VSD-VRChatScreenshotDiscord_${{ env.VERSION }}.zip" >> $GITHUB_ENV
 
       - name: ZIPファイルをリリースにアップロード
         uses: ncipollo/release-action@v1
