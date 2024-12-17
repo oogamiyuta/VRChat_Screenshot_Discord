@@ -1,65 +1,56 @@
-name: Build Project
+name: Build and Release VB.NET App
 
 on:
   push:
     branches:
-      - master
+      - main  # メインブランチにPushされたとき
+    # または、手動でワークフローをトリガーすることも可能です
+    # イベントトリガーでタグ名を指定することもできます
 
 jobs:
   build:
+    name: Build and Create Release for VB.NET Application
     runs-on: windows-latest
 
     steps:
-      - name: チェックアウトリポジトリ
-        uses: actions/checkout@v3
+      # 1. リポジトリのコードをチェックアウト
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: .NET SDKのセットアップ
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0.x
+      # 2. .NET SDK をセットアップ
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1.3.1
 
-      - name: ビルドを実行
+      # 3. ビルド実行
+      - name: Build Project
         run: |
-          dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
-          dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
+          msbuild /p:Configuration=Release /p:Platform="Any CPU"
 
-      - name: タグの作成
-        shell: bash
+      # 4. ビルド済みファイルをZIP圧縮
+      - name: Create ZIP Archive
         run: |
-          DATE=$(date +"%Y%m%d_%H%M%S")
-          VERSION="v${DATE}_001"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git tag -a "$VERSION" -m "Version $VERSION"
-          git push origin "$VERSION"
+          Compress-Archive -Path .\bin\Release\* -DestinationPath vbnet_app_release.zip
 
-      - name: GitHubリリースを作成
-        uses: actions/create-release@v1
+      # 5. タグを自動作成（バージョン番号の決定）
+      - name: Create New Tag
+        run: |
+          # タグ名は例えば、"v1.0" などで、コミットから取得するか自動生成する
+          NEW_TAG="v$(date +'%Y.%m.%d.%H%M')"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 6. GitHubリリースを作成し、ZIPファイルをアップロード
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: リリース ${{ env.VERSION }}
+          tag_name: ${{ steps.create_tag.outputs.new_tag }}
+          name: Release ${{ steps.create_tag.outputs.new_tag }}
           body: |
-            **リリースノート**
-            - バージョン: **${{ env.VERSION }}**
-            - 変更点:
-              - 安定性が向上しました。
-              - 既知の問題を修正しました。
-          draft: false
-          prerelease: false
-
-      - name: パッケージを圧縮
-        shell: pwsh
-        run: |
-          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
-          Compress-Archive -Path ./output/* -DestinationPath "./output/VSD-VRChatScreenshotDiscord_${{ env.VERSION }}.zip"
-          echo "ZIP_NAME=VSD-VRChatScreenshotDiscord_${{ env.VERSION }}.zip" >> $GITHUB_ENV
-
-      - name: ZIPファイルをリリースにアップロード
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: ./output/${{ env.ZIP_NAME }}
-          tag: "${{ env.VERSION }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
+            ## リリースノート
+            - 最新のビルドファイルが含まれます。
+            - バージョン: ${{ steps.create_tag.outputs.new_tag }}
+          files: vbnet_app_release.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
