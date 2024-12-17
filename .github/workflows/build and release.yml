@@ -3,7 +3,7 @@ name: Build and Release VB.NET App
 on:
   push:
     branches:
-      - main  # メインブランチにPushされたとき
+      - master  # メインブランチにPushされたとき
     # または、手動でワークフローをトリガーすることも可能です
     # イベントトリガーでタグ名を指定することもできます
 
