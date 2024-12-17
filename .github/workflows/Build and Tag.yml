@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build and Tag
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build-and-release:
+  build-and-tag:
     runs-on: windows-latest
 
     steps:
@@ -40,42 +40,15 @@ jobs:
           $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV
         echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
-        echo "VERSION=V$VERSION" >> $GITHUB_ENV
+        echo "::set-output name=version::$VERSION"
       shell: pwsh
 
     - name: Create Tag
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git tag ${{ env.VERSION }}
-        git push origin ${{ env.VERSION }}
-      env:
-        VERSION: ${{ env.VERSION }}
-
-    - name: Create GitHub Release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
-        body: |
-          **Release Notes**
-          - Version: ${{ env.VERSION }}
-          - Changes:
-            - Improved stability.
-            - Fixed known issues.
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: ${{ env.ZIP_PATH }}
-        asset_name: ${{ env.ZIP_NAME }}
-        asset_content_type: application/zip
+        git tag ${{ steps.create_zip.outputs.version }}
+        git push origin ${{ steps.create_zip.outputs.version }}
