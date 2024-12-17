@@ -1,8 +1,8 @@
-name: Create GitHub Release
+name: Create Release
 
 on:
   workflow_run:
-    workflows: ["Build"]
+    workflows: ["Build Project"]
     types:
       - completed
 
