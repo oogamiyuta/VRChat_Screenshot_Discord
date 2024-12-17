@@ -1,13 +1,13 @@
-name: Build Project
+name: Build and Create ZIP
 
 on:
   push:
     branches:
-      - master
+      - master  # 必要に応じて変更
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: チェックアウトリポジトリ
@@ -16,32 +16,19 @@ jobs:
       - name: .NET SDKのセットアップ
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: '8.0.x'
 
-      - name: ビルドを実行
-        run: |
-          dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
-          dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
+      - name: パッケージの復元
+        run: dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
 
-      - name: パッケージを作成
-        shell: pwsh
-        run: |
-          $DATE = (Get-Date -Format "yyyyMMdd")
-          $COUNTER = 1
-          do {
-            $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
-            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
-            $COUNTER++
-          } while (Test-Path "./output/$ZIP_NAME")
+      - name: ビルド
+        run: dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
 
-          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
-          Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
+      - name: パブリッシュ
+        run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output /home/runner/work/VRChat_Screenshot_Discord/VRChat_Screenshot_Discord/output
 
-          echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
-          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
-
-      - name: ZIPファイルをアーティファクトとして保存
-        uses: actions/upload-artifact@v4
+      - name: アーティファクトの作成
+        uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          Path: ./output/*
+          path: /home/runner/work/VRChat_Screenshot_Discord/VRChat_Screenshot_Discord/output/*.zip  # 絶対パス
