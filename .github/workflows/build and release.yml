@@ -26,7 +26,7 @@ jobs:
       - name: パッケージを作成
         shell: pwsh
         run: |
-          $DATE = (Get-Date -Format "yyyyMMdd")
+          $DATE = (Get-Date -Format "yyyyMMdd_HHmmss")
           $COUNTER = 1
           do {
             $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
