@@ -1,0 +1,50 @@
+name: Build Project
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: チェックアウトリポジトリ
+        uses: actions/checkout@v3
+
+      - name: .NET SDKのセットアップ
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: ビルドを実行
+        run: |
+          dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
+          dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
+
+      - name: パッケージを作成
+        shell: pwsh
+        run: |
+          # バージョンと日付を使ったZIP名を生成
+          $DATE = (Get-Date -Format "yyyyMMdd")
+          $COUNTER = 1
+          do {
+            $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
+            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
+            $COUNTER++
+          } while (Test-Path "./output/$ZIP_NAME")
+
+          # ZIPファイルを作成
+          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
+          Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
+
+          # バージョンとZIP名を環境変数に設定
+          echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
+          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
+
+      - name: ZIPファイルをアーティファクトとして保存
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ./output/${{ env.ZIP_NAME }}

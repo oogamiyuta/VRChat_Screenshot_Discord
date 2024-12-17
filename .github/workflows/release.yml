@@ -1,0 +1,63 @@
+name: Create Release
+
+on:
+  workflow_run:
+    workflows: ["Build Project"] # 1つ目のワークフローが成功したら実行
+    types:
+      - completed
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: チェックアウトリポジトリ
+        uses: actions/checkout@v3
+
+      - name: アーティファクトをダウンロード
+        uses: actions/download-artifact@v3
+        with:
+          name: VSD-VRChatScreenshotDiscord_*
+          path: ./output
+
+      - name: タグの作成
+        shell: bash
+        run: |
+          # アーティファクトのZIP名を取得
+          ZIP_NAME=$(ls ./output/*.zip | xargs -n 1 basename)
+          VERSION=$(echo $ZIP_NAME | sed 's/VSD-VRChatScreenshotDiscord_V\(.*\).zip/\1/')
+
+          # タグを作成してプッシュ
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -a "$VERSION" -m "Version $VERSION"
+          git push origin "$VERSION"
+
+          # 環境変数にバージョンを設定
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: GitHubリリースを作成
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: リリース ${{ env.VERSION }}
+          body: |
+            **リリースノート**
+            - バージョン: **${{ env.VERSION }}**
+            - 変更点:
+              - 安定性が向上しました。
+              - 既知の問題を修正しました。
+          draft: false
+          prerelease: false
+
+      - name: ZIPファイルをリリースにアップロード
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/${{ env.ZIP_NAME }}
+          asset_name: ${{ env.ZIP_NAME }}
+          asset_content_type: application/zip
