@@ -27,18 +27,22 @@ jobs:
     - name: Publish the project
       run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
 
-    - name: Create ZIP file
+    - name: Generate version and create ZIP file
       id: create_zip
       run: |
-        $VERSION = (Get-Date -Format "yyyyMMdd")
+        $VERSION_DATE = (Get-Date -Format "yyyyMMdd")
         $COUNTER = 1
-        $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+        $VERSION = "$VERSION_DATE_{0:D3}" -f $COUNTER
+        $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         while (Test-Path "./output/$ZIP_NAME") {
           $COUNTER++
-          $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION_{0:D3}.zip" -f $COUNTER
+          $VERSION = "$VERSION_DATE_{0:D3}" -f $COUNTER
+          $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
         }
         Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
-        echo "::set-output name=zip_path::./output/$ZIP_NAME"
+        echo "ZIP_PATH=./output/$ZIP_NAME" >> $GITHUB_ENV
+        echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+        echo "VERSION=V$VERSION" >> $GITHUB_ENV
       shell: pwsh
 
     - name: Create GitHub Release
