@@ -1,35 +1,55 @@
-name: Create Release
+name: Build Project
 
 on:
-  workflow_run:
-    workflows: ["Build Project"]
-    types:
-      - completed
+  push:
+    branches:
+      - master
 
 jobs:
-  release:
+  build:
     runs-on: windows-latest
 
     steps:
       - name: チェックアウトリポジトリ
         uses: actions/checkout@v3
 
-      - name: アーティファクトをダウンロード
-        uses: actions/download-artifact@v3
+      - name: .NET SDKのセットアップ
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: ビルドを実行
+        run: |
+          dotnet restore VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj
+          dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
+
+      - name: パッケージを作成
+        shell: pwsh
+        run: |
+          $DATE = (Get-Date -Format "yyyyMMdd")
+          $COUNTER = 1
+          do {
+            $VERSION = "{0}_{1:D3}" -f $DATE, $COUNTER
+            $ZIP_NAME = "VSD-VRChatScreenshotDiscord_V$VERSION.zip"
+            $COUNTER++
+          } while (Test-Path "./output/$ZIP_NAME")
+
+          dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output ./output
+          Compress-Archive -Path ./output/* -DestinationPath "./output/$ZIP_NAME"
+
+          echo "VERSION=V$VERSION" >> $env:GITHUB_ENV
+          echo "ZIP_NAME=$ZIP_NAME" >> $env:GITHUB_ENV
+
+      - name: ZIPファイルをアーティファクトとして保存
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifact
-          path: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*  # Windows絶対パス
+          path: D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*
 
-      - name: ダウンロードしたZIPファイルを確認
-        run: |
-          dir "D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output"
-
-      - name: タグの作成
+        name: タグの作成
         shell: bash
         run: |
-          ZIP_NAME=$(ls "D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*.zip" | xargs -n 1 basename)
-          VERSION=$(echo $ZIP_NAME | sed 's/VSD-VRChatScreenshotDiscord_V\(.*\).zip/\1/')
-
+          
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git tag -a "$VERSION" -m "Version $VERSION"
