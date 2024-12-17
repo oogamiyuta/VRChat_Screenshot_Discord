@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: チェックアウトリポジトリ
@@ -25,10 +25,10 @@ jobs:
         run: dotnet build VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release
 
       - name: パブリッシュ
-        run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output /home/runner/work/VRChat_Screenshot_Discord/VRChat_Screenshot_Discord/output
+        run: dotnet publish VRChat_Screenshot_Discord/VRChat_Screenshot_Discord.vbproj --configuration Release --output "D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output"
 
       - name: アーティファクトの作成
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          path: /home/runner/work/VRChat_Screenshot_Discord/VRChat_Screenshot_Discord/output/*.zip  # 絶対パス
+          path: "D:\a\VRChat_Screenshot_Discord\VRChat_Screenshot_Discord\output\*.zip"  # Windows絶対パス
