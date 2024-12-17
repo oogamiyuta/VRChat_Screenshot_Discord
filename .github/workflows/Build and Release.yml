@@ -45,17 +45,28 @@ jobs:
         echo "VERSION=V$VERSION" >> $GITHUB_ENV
       shell: pwsh
 
+    - name: Create Tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag ${{ env.VERSION }}
+        git push origin ${{ env.VERSION }}
+      env:
+        VERSION: ${{ env.VERSION }}
+
     - name: Create GitHub Release
-      id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.sha }}
-        release_name: Release V${{ github.sha }}
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
         body: |
           **Release Notes**
-          - Changes in this release.
+          - Version: ${{ env.VERSION }}
+          - Changes:
+            - Improved stability.
+            - Fixed known issues.
         draft: false
         prerelease: false
 
@@ -64,7 +75,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.create_zip.outputs.zip_path }}
-        asset_name: VSD-VRChatScreenshotDiscord.zip
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: ${{ env.ZIP_PATH }}
+        asset_name: ${{ env.ZIP_NAME }}
         asset_content_type: application/zip
