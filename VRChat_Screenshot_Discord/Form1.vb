@@ -4,6 +4,7 @@ Imports System.Text
 Imports System.Text.RegularExpressions
 Imports System.Configuration
 Imports Newtonsoft.Json
+Imports System.Reflection
 
 Public Class Form1
     Private watcher As FileSystemWatcher
@@ -13,6 +14,22 @@ Public Class Form1
         ' 設定値の読み込み
         TextBox1.Text = ConfigurationManager.AppSettings("FolderPath")
         TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
+
+        ' リンクボタンの初期化
+        InitializeUpdateLinkButton()
+
+        ' GitHubのバージョンチェック
+        CheckGitHubVersion()
+    End Sub
+
+    Private Sub InitializeUpdateLinkButton()
+        With UpdateLinkButton
+            .Text = "更新をダウンロード"
+            .Visible = False ' 初期状態では非表示
+
+        End With
+        AddHandler UpdateLinkButton.Click, AddressOf OpenUpdateLink
+
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -45,6 +62,83 @@ Public Class Form1
         InvokeIfRequired(Sub() ListBox1.Items.Add("監視を開始しました: " & folderPath))
     End Sub
 
+    Private Sub CheckGitHubVersion()
+        Try
+            Dim currentVersion As String = NormalizeVersion(GetCurrentVersion())
+            Dim latestVersion As String = GetLatestGitHubVersion()
+
+            If Not String.IsNullOrEmpty(latestVersion) AndAlso currentVersion <> latestVersion Then
+                Me.Text = $"VRChat写真をDiscordにアップ - Ver. {currentVersion}（新しいバージョン {latestVersion} があります！）"
+                UpdateLinkButton.Visible = True
+
+                'メッセージボックスを表示する 
+                Dim result As DialogResult = MessageBox.Show($" Ver. {currentVersion}（新しいバージョン {latestVersion} があります！）" & vbCrLf & "boothでダウンロードしますか？",
+                                                             "アップデートの確認",
+                                                             MessageBoxButtons.YesNo,
+                                                             MessageBoxIcon.Exclamation,
+                                                             MessageBoxDefaultButton.Button1)
+
+                '何が選択されたか調べる 
+                If result = DialogResult.Yes Then
+                    '「はい」が選択された時 
+                    OpenUpdateLink(Nothing, Nothing)
+                ElseIf result = DialogResult.No Then
+                    '「いいえ」が選択された時 
+
+
+                End If
+
+            Else
+                Me.Text = $"VRChat写真をDiscordにアップ - Ver. {currentVersion}"
+                UpdateLinkButton.Visible = False
+            End If
+        Catch ex As Exception
+            InvokeIfRequired(Sub() ListBox1.Items.Add("GitHubバージョンチェック中のエラー: " & ex.Message))
+        End Try
+    End Sub
+
+    Private Function GetCurrentVersion() As String
+        Return Assembly.GetExecutingAssembly().GetName().Version.ToString()
+    End Function
+
+    Private Function GetLatestGitHubVersion() As String
+        Dim apiUrl As String = "https://api.github.com/repos/oogamiyuta/VRChat_Screenshot_Discord/releases/latest" ' 必要に応じて変更
+        Dim latestVersion As String = String.Empty
+
+        Try
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "VB.NET Application")
+            Dim response = httpClient.GetStringAsync(apiUrl).Result
+            Dim jsonResponse = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(response)
+
+            If jsonResponse.ContainsKey("tag_name") Then
+                ' プレフィックスを除去してバージョン番号を取得
+                Dim rawVersion As String = jsonResponse("tag_name").ToString()
+                latestVersion = NormalizeVersion(rawVersion)
+            End If
+        Catch ex As Exception
+            InvokeIfRequired(Sub() ListBox1.Items.Add("GitHubからのバージョン取得エラー: " & ex.Message))
+        End Try
+
+        Return latestVersion
+    End Function
+    Private Function NormalizeVersion(version As String) As String
+        ' 正規表現でバージョン番号部分を抽出（例: "Ver.1.0.0.0" → "1.0.0.0"）
+        Dim match = Regex.Match(version, "\d+(\.\d+)+")
+        If match.Success Then
+            Return match.Value
+        End If
+
+        ' バージョン番号が見つからない場合はそのまま返す
+        Return version
+    End Function
+
+    Private Sub OpenUpdateLink(sender As Object, e As EventArgs)
+        Dim updateUrl As String = "https://yuta-vtuber.booth.pm/items/6396052"
+        Process.Start(New ProcessStartInfo(updateUrl) With {.UseShellExecute = True})
+    End Sub
+
+
+    ' 以下は既存コード（編集なし）
     Private Sub OnNewImageCreated(sender As Object, e As FileSystemEventArgs)
         ' 画像が追加された際にログファイルを確認し、ワールド名を抽出
         Try
@@ -137,6 +231,7 @@ Public Class Form1
             InvokeIfRequired(Sub() ListBox1.Items.Add("Discord送信エラー: " & ex.Message))
         End Try
     End Sub
+
 
     Private Sub InvokeIfRequired(action As Action)
         If Me.InvokeRequired Then

@@ -29,12 +29,13 @@ Partial Class Form1
         TextBox1 = New TextBox()
         TextBox2 = New TextBox()
         Button1 = New Button()
+        UpdateLinkButton = New Button()
         SuspendLayout()
         ' 
         ' Label1
         ' 
         Label1.AutoSize = True
-        Label1.Location = New Point(12, 9)
+        Label1.Location = New Point(12, 14)
         Label1.Name = "Label1"
         Label1.Size = New Size(122, 15)
         Label1.TabIndex = 0
@@ -43,7 +44,7 @@ Partial Class Form1
         ' Label2
         ' 
         Label2.AutoSize = True
-        Label2.Location = New Point(12, 53)
+        Label2.Location = New Point(12, 58)
         Label2.Name = "Label2"
         Label2.Size = New Size(82, 15)
         Label2.TabIndex = 1
@@ -54,39 +55,49 @@ Partial Class Form1
         ListBox1.FormattingEnabled = True
         ListBox1.HorizontalScrollbar = True
         ListBox1.ItemHeight = 15
-        ListBox1.Location = New Point(12, 97)
+        ListBox1.Location = New Point(12, 102)
         ListBox1.Name = "ListBox1"
-        ListBox1.Size = New Size(556, 139)
+        ListBox1.Size = New Size(556, 154)
         ListBox1.TabIndex = 2
         ' 
         ' TextBox1
         ' 
-        TextBox1.Location = New Point(12, 27)
+        TextBox1.Location = New Point(12, 32)
         TextBox1.Name = "TextBox1"
         TextBox1.Size = New Size(543, 23)
         TextBox1.TabIndex = 3
         ' 
         ' TextBox2
         ' 
-        TextBox2.Location = New Point(12, 71)
+        TextBox2.Location = New Point(12, 76)
         TextBox2.Name = "TextBox2"
         TextBox2.Size = New Size(543, 23)
         TextBox2.TabIndex = 4
         ' 
         ' Button1
         ' 
-        Button1.Location = New Point(574, 71)
+        Button1.Location = New Point(574, 76)
         Button1.Name = "Button1"
-        Button1.Size = New Size(75, 23)
+        Button1.Size = New Size(75, 24)
         Button1.TabIndex = 5
         Button1.Text = "監視開始"
         Button1.UseVisualStyleBackColor = True
         ' 
+        ' UpdateLinkButton
+        ' 
+        UpdateLinkButton.Location = New Point(527, 3)
+        UpdateLinkButton.Name = "UpdateLinkButton"
+        UpdateLinkButton.Size = New Size(122, 24)
+        UpdateLinkButton.TabIndex = 6
+        UpdateLinkButton.Text = "更新リンク"
+        UpdateLinkButton.UseVisualStyleBackColor = True
+        ' 
         ' Form1
         ' 
-        AutoScaleDimensions = New SizeF(7.0F, 15.0F)
+        AutoScaleDimensions = New SizeF(7F, 15F)
         AutoScaleMode = AutoScaleMode.Font
         ClientSize = New Size(649, 263)
+        Controls.Add(UpdateLinkButton)
         Controls.Add(Button1)
         Controls.Add(TextBox2)
         Controls.Add(TextBox1)
@@ -111,4 +122,5 @@ Partial Class Form1
 
     Friend WithEvents TextBox2 As TextBox
     Friend WithEvents Button1 As Button
+    Friend WithEvents UpdateLinkButton As Button
 End Class
