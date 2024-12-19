@@ -41,5 +41,9 @@ VRChatでの冒険をさらに楽しく！
 
 次回からは起動時に読み込まれるので設定はいらないです。
 
+### ※VRChatの設定から、デバック情報にあるログ出力をONにしてください。
+![image](https://github.com/user-attachments/assets/a80fdddd-03ba-4e1c-8092-3f6adbc0fa67)
+
+
 # プレビュー
 ![image](https://github.com/user-attachments/assets/6c79ad39-51d9-484f-b290-b30941d62e54)
