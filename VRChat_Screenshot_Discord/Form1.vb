@@ -9,11 +9,24 @@ Imports System.Reflection
 Public Class Form1
     Private watcher As FileSystemWatcher
     Private httpClient As HttpClient = New HttpClient()
+    Private currentLanguage As String = "ja" ' 言語の初期設定
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' 言語設定を読み込み
+        currentLanguage = LoadLanguageSelection()
+        If String.IsNullOrEmpty(currentLanguage) Then
+            currentLanguage = "ja" ' デフォルト値
+        End If
+
         ' 設定値の読み込み
         TextBox1.Text = ConfigurationManager.AppSettings("FolderPath")
         TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
+
+        ' 言語リストをComboBoxに追加
+        LoadLanguages()
+
+        ' UIを初期化
+        UpdateUIForLanguage()
 
         ' リンクボタンの初期化
         InitializeUpdateLinkButton()
@@ -22,14 +35,36 @@ Public Class Form1
         CheckGitHubVersion()
     End Sub
 
+    Private Sub LoadLanguages()
+        ComboBoxLanguage.Items.Clear()
+
+        ' 言語をインデックス順に追加
+        ComboBoxLanguage.Items.Add(GetLocalizedString("Language_Japanese")) ' インデックス 0
+        ComboBoxLanguage.Items.Add(GetLocalizedString("Language_English")) ' インデックス 1
+        ComboBoxLanguage.Items.Add(GetLocalizedString("Language_Korean"))  ' インデックス 2
+        ComboBoxLanguage.Items.Add(GetLocalizedString("Language_Chinese")) ' インデックス 3
+
+        ' 現在の言語に対応するインデックスを選択
+        Select Case currentLanguage
+            Case "ja"
+                ComboBoxLanguage.SelectedIndex = 0
+            Case "en"
+                ComboBoxLanguage.SelectedIndex = 1
+            Case "ko"
+                ComboBoxLanguage.SelectedIndex = 2
+            Case "zh"
+                ComboBoxLanguage.SelectedIndex = 3
+            Case Else
+                ComboBoxLanguage.SelectedIndex = 0 ' デフォルトは日本語
+        End Select
+    End Sub
+
     Private Sub InitializeUpdateLinkButton()
         With UpdateLinkButton
-            .Text = "更新をダウンロード"
-            .Visible = False ' 初期状態では非表示
-
+            .Text = GetLocalizedString("UpdateDownloadButtonText")
+            .Visible = False
         End With
         AddHandler UpdateLinkButton.Click, AddressOf OpenUpdateLink
-
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
@@ -37,20 +72,18 @@ Public Class Form1
         Dim webhookUrl As String = TextBox2.Text
 
         If String.IsNullOrWhiteSpace(folderPath) OrElse String.IsNullOrWhiteSpace(webhookUrl) Then
-            MessageBox.Show("フォルダーのパスとWebhook URLを入力してください。")
+            MessageBox.Show(GetLocalizedString("FolderPathInputMessage"))
             Return
         End If
 
         If Not Directory.Exists(folderPath) Then
-            MessageBox.Show("指定されたフォルダーが存在しません。")
+            MessageBox.Show(GetLocalizedString("FolderNotExistMessage"))
             Return
         End If
 
-        ' 設定値の保存
         SaveSettings("FolderPath", folderPath)
         SaveSettings("WebhookUrl", webhookUrl)
 
-        ' ファイル監視の設定
         watcher = New FileSystemWatcher()
         watcher.Path = folderPath
         watcher.Filter = "*.png"
@@ -59,7 +92,7 @@ Public Class Form1
         AddHandler watcher.Created, AddressOf OnNewImageCreated
         watcher.EnableRaisingEvents = True
 
-        InvokeIfRequired(Sub() ListBox1.Items.Add("監視を開始しました: " & folderPath))
+        InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("StartWatchingMessage") & ": " & folderPath))
     End Sub
 
     Private Sub CheckGitHubVersion()
@@ -67,34 +100,72 @@ Public Class Form1
             Dim currentVersion As String = NormalizeVersion(GetCurrentVersion())
             Dim latestVersion As String = GetLatestGitHubVersion()
 
+            latestVersion = latestVersion.Replace("Ver.", "").Trim()
+
             If Not String.IsNullOrEmpty(latestVersion) AndAlso currentVersion <> latestVersion Then
-                Me.Text = $"VRChat写真をDiscordにアップ - Ver. {currentVersion}（新しいバージョン {latestVersion} があります！）"
+                Me.Text = GetLocalizedString("AppTitleWithUpdate").Replace("{currentVersion}", currentVersion).Replace("{latestVersion}", latestVersion)
                 UpdateLinkButton.Visible = True
 
-                'メッセージボックスを表示する 
-                Dim result As DialogResult = MessageBox.Show($" Ver. {currentVersion}（新しいバージョン {latestVersion} があります！）" & vbCrLf & "boothでダウンロードしますか？",
-                                                             "アップデートの確認",
-                                                             MessageBoxButtons.YesNo,
-                                                             MessageBoxIcon.Exclamation,
-                                                             MessageBoxDefaultButton.Button1)
+                Dim message As String = String.Format(
+    GetLocalizedString("UpdateAvailableMessage").Replace("{currentVersion}", currentVersion).Replace("{latestVersion}", latestVersion) &
+    Environment.NewLine & GetLocalizedString("UpdateDownloadMessage").Replace("{latestVersion}", latestVersion),
+    currentVersion, latestVersion)
 
-                '何が選択されたか調べる 
+
+                Dim result As DialogResult = MessageBox.Show(message,
+                GetLocalizedString("UpdateCheckTitle"),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Exclamation,
+                MessageBoxDefaultButton.Button1)
+
                 If result = DialogResult.Yes Then
-                    '「はい」が選択された時 
                     OpenUpdateLink(Nothing, Nothing)
-                ElseIf result = DialogResult.No Then
-                    '「いいえ」が選択された時 
-
-
                 End If
-
             Else
-                Me.Text = $"VRChat写真をDiscordにアップ - Ver. {currentVersion}"
+                Me.Text = GetLocalizedString("AppTitle").Replace("{currentVersion}", currentVersion)
                 UpdateLinkButton.Visible = False
             End If
         Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add("GitHubバージョンチェック中のエラー: " & ex.Message))
+            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("GitHubVersionCheckError") & ": " & ex.Message))
         End Try
+    End Sub
+
+    Private Function GetLocalizedString(key As String) As String
+        Dim localizedString As String = Nothing
+
+        Select Case currentLanguage
+            Case "ja"
+                localizedString = My.Resources.Resources.ResourceManager.GetString(key, New System.Globalization.CultureInfo("ja"))
+            Case "en"
+                localizedString = My.Resources.Resources.ResourceManager.GetString(key, New System.Globalization.CultureInfo("en"))
+            Case "ko"
+                localizedString = My.Resources.Resources.ResourceManager.GetString(key, New System.Globalization.CultureInfo("ko"))
+            Case "zh"
+                localizedString = My.Resources.Resources.ResourceManager.GetString(key, New System.Globalization.CultureInfo("zh"))
+            Case Else
+                localizedString = My.Resources.Resources.ResourceManager.GetString(key, New System.Globalization.CultureInfo("ja"))
+        End Select
+
+        If String.IsNullOrEmpty(localizedString) Then
+            localizedString = "リソースが見つかりませんでした: " & key
+        End If
+
+        Return localizedString
+    End Function
+
+    Private Sub OpenUpdateLink(sender As Object, e As EventArgs)
+        Process.Start("https://yuta-vtuber.booth.pm/items/6396052")
+    End Sub
+
+    Private Sub SaveSettings(key As String, value As String)
+        Dim config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)
+        If config.AppSettings.Settings(key) Is Nothing Then
+            config.AppSettings.Settings.Add(key, value)
+        Else
+            config.AppSettings.Settings(key).Value = value
+        End If
+        config.Save(ConfigurationSaveMode.Modified)
+        ConfigurationManager.RefreshSection("appSettings")
     End Sub
 
     Private Function GetCurrentVersion() As String
@@ -102,57 +173,33 @@ Public Class Form1
     End Function
 
     Private Function GetLatestGitHubVersion() As String
-        Dim apiUrl As String = "https://api.github.com/repos/oogamiyuta/VRChat_Screenshot_Discord/releases/latest" ' 必要に応じて変更
-        Dim latestVersion As String = String.Empty
+        Dim url As String = "https://api.github.com/repos/oogamiyuta/VRChat_Screenshot_Discord/releases/latest"
+        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MyApp")
+        Dim response = httpClient.GetStringAsync(url).Result
+        Dim jsonResponse = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(response)
 
-        Try
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "VB.NET Application")
-            Dim response = httpClient.GetStringAsync(apiUrl).Result
-            Dim jsonResponse = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(response)
-
-            If jsonResponse.ContainsKey("tag_name") Then
-                ' プレフィックスを除去してバージョン番号を取得
-                Dim rawVersion As String = jsonResponse("tag_name").ToString()
-                latestVersion = NormalizeVersion(rawVersion)
-            End If
-        Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add("GitHubからのバージョン取得エラー: " & ex.Message))
-        End Try
-
-        Return latestVersion
+        Return jsonResponse("tag_name").ToString()
     End Function
+
     Private Function NormalizeVersion(version As String) As String
-        ' 正規表現でバージョン番号部分を抽出（例: "Ver.1.0.0.0" → "1.0.0.0"）
-        Dim match = Regex.Match(version, "\d+(\.\d+)+")
-        If match.Success Then
-            Return match.Value
-        End If
-
-        ' バージョン番号が見つからない場合はそのまま返す
-        Return version
+        Dim match = Regex.Match(version, "(\d+\.\d+\.\d+\.\d+)")
+        Return If(match.Success, match.Groups(1).Value, "")
     End Function
 
-    Private Sub OpenUpdateLink(sender As Object, e As EventArgs)
-        Dim updateUrl As String = "https://yuta-vtuber.booth.pm/items/6396052"
-        Process.Start(New ProcessStartInfo(updateUrl) With {.UseShellExecute = True})
-    End Sub
-
-
-    ' 以下は既存コード（編集なし）
     Private Sub OnNewImageCreated(sender As Object, e As FileSystemEventArgs)
         ' 画像が追加された際にログファイルを確認し、ワールド名を抽出
         Try
             Dim baseLogFolder As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).Replace("Local", "LocalLow"), "VRChat", "VRChat")
 
             If Not Directory.Exists(baseLogFolder) Then
-                InvokeIfRequired(Sub() ListBox1.Items.Add("ログフォルダーが見つかりません: " & baseLogFolder))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("LogFolderNotFoundMessage") & ": " & baseLogFolder))
                 Return
             End If
 
             Dim logFiles = Directory.GetFiles(baseLogFolder, "output_log_*.txt", SearchOption.AllDirectories)
 
             If logFiles.Length = 0 Then
-                InvokeIfRequired(Sub() ListBox1.Items.Add("ログファイルが見つかりません。"))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("LogFilesNotFoundMessage")))
                 Return
             End If
 
@@ -165,8 +212,59 @@ Public Class Form1
                 End If
             End If
         Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add("エラー: " & ex.Message))
+            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("ErrorOccurredMessage") & ": " & ex.Message))
         End Try
+    End Sub
+
+
+
+    Private Sub InvokeIfRequired(action As Action)
+        If InvokeRequired Then
+            Invoke(action)
+        Else
+            action()
+        End If
+    End Sub
+
+    Private Sub SaveLanguageSelection(language As String)
+        SaveSettings("Language", language)
+    End Sub
+
+    Private Function LoadLanguageSelection() As String
+        Return ConfigurationManager.AppSettings("Language")
+    End Function
+
+    Private Sub ComboBoxLanguage_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLanguage.SelectedIndexChanged
+        ' インデックスで言語を判定
+        Select Case ComboBoxLanguage.SelectedIndex
+            Case 0 : currentLanguage = "ja"
+            Case 1 : currentLanguage = "en"
+            Case 2 : currentLanguage = "ko"
+            Case 3 : currentLanguage = "zh"
+            Case Else : currentLanguage = "ja" ' デフォルト
+        End Select
+
+        SaveLanguageSelection(currentLanguage)
+        UpdateUIForLanguage()
+        ' フォームタイトル（Me.Text）も更新
+        Dim currentVersion As String = GetCurrentVersion()
+        Dim latestVersion As String = GetLatestGitHubVersion()
+        latestVersion = latestVersion.Replace("Ver.", "").Trim()
+
+        If currentVersion <> latestVersion Then
+            ' 更新がある場合
+            Me.Text = GetLocalizedString("AppTitleWithUpdate").Replace("{currentVersion}", currentVersion).Replace("{latestVersion}", latestVersion)
+        Else
+            ' 更新がない場合
+            Me.Text = GetLocalizedString("AppTitle").Replace("{currentVersion}", currentVersion)
+        End If
+    End Sub
+
+    Private Sub UpdateUIForLanguage()
+        Label1.Text = GetLocalizedString("Language")
+        Label2.Text = GetLocalizedString("Label2")
+        Button1.Text = GetLocalizedString("start")
+        UpdateLinkButton.Text = GetLocalizedString("UpdateDownloadButtonText")
     End Sub
 
     Private Function ExtractWorldNameFromLog(logFilePath As String) As String
@@ -180,7 +278,7 @@ Public Class Form1
                             Dim match = Regex.Match(line, "Entering Room: (.+)")
                             If match.Success Then
                                 Dim worldName = match.Groups(1).Value
-                                InvokeIfRequired(Sub() ListBox1.Items.Add("ワールド名を検出: " & worldName))
+                                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("WorldNameDetectedMessage") & ": " & worldName))
                                 Return worldName
                             End If
                         End If
@@ -188,7 +286,7 @@ Public Class Form1
                 End Using
             End Using
         Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add("ログ解析中のエラー: " & ex.Message))
+            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("LogParsingErrorMessage") & ": " & ex.Message))
         End Try
 
         Return String.Empty
@@ -200,13 +298,13 @@ Public Class Form1
 
             ' JSON形式で送信内容を構築
             Dim jsonPayload As New With {
-                Key .content = "新しい画像がアップロードされました。",
+                Key .content = GetLocalizedString("NewImageUploadedMessage"),
                 Key .embeds = New Object() {
                     New With {
-                        Key .title = "画像情報",
+                        Key .title = GetLocalizedString("ImageInformationTitle"),
                         Key .fields = New Object() {
-                            New With {Key .name = "ワールド名", Key .value = worldName, Key .inline = True},
-                            New With {Key .name = "撮影日時", Key .value = captureTime, Key .inline = True}
+                            New With {Key .name = GetLocalizedString("WorldNameLabel"), Key .value = worldName, Key .inline = True},
+                            New With {Key .name = GetLocalizedString("CaptureTimeLabel"), Key .value = captureTime, Key .inline = True}
                         }
                     }
                 }
@@ -223,32 +321,14 @@ Public Class Form1
 
             Dim response = Await httpClient.PostAsync(webhookUrl, multipartContent)
             If response.IsSuccessStatusCode Then
-                InvokeIfRequired(Sub() ListBox1.Items.Add("Discordに送信成功: " & worldName))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendSuccessMessage") & ": " & worldName))
             Else
-                InvokeIfRequired(Sub() ListBox1.Items.Add("Discord送信失敗: " & response.StatusCode))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendFailureMessage") & ": " & response.StatusCode))
             End If
         Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add("Discord送信エラー: " & ex.Message))
+            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendErrorMessage") & ": " & ex.Message))
         End Try
     End Sub
 
 
-    Private Sub InvokeIfRequired(action As Action)
-        If Me.InvokeRequired Then
-            Me.Invoke(action)
-        Else
-            action()
-        End If
-    End Sub
-
-    Private Sub SaveSettings(key As String, value As String)
-        Dim config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)
-        If config.AppSettings.Settings(key) Is Nothing Then
-            config.AppSettings.Settings.Add(key, value)
-        Else
-            config.AppSettings.Settings(key).Value = value
-        End If
-        config.Save(ConfigurationSaveMode.Modified)
-        ConfigurationManager.RefreshSection("appSettings")
-    End Sub
 End Class
