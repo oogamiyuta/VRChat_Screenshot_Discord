@@ -171,4 +171,5 @@ VRChat 경험을 더욱 즐겁게 만드세요! 🚀
 
 # 미리보기  
 ![スクリーンショット 2024-12-22 003305](https://github.com/user-attachments/assets/bca02d29-7182-495e-aa72-6b9662236811)  
-![image](https://github.com/user-attachments/assets/637e29ab-8e28-419e-96d4-9dd7d75ae4a7)
+![スクリーンショット 2024-12-22 021406](https://github.com/user-attachments/assets/b559533c-1e28-4d25-bee1-0f9fd7393083)
+
