@@ -21,7 +21,6 @@ Make your VRChat experience even more exciting! 🚀
 让您的 VRChat 探险更加有趣！
  该软件是一款方便实用的工具，可自动将您在 VRChat 中拍摄的所有精美截图连同世界名称一起发送到 Discord。
  您可以立即与朋友分享您在哪个世界中拍摄的截图，共同享受这一时刻。
- 通过简单直观的操作，您可以更轻松、更投入地分享您的 VRChat 记忆！
 
 🎉 **现已在Booth上提供！**  
 让您的VRChat体验更加精彩！🚀  
@@ -77,7 +76,7 @@ Share the webhook URL with your members.
 ・更新がある場合、起動時にダイアログが出ます。ダウンロードする場合は”はい”を選んでください。
 ・また、タイトルに更新通知が表示され、右上にダウンロード用のボタンがあります。
 
-### When you first start up your computer, if there is a notification about an update 
+### When you first start up your computer, if there is a notification about an update
 ・If there are updates, a dialog box will appear when you start the program. Click "Yes" to download them.
 ・The title of the file will also display an update notification, and there will be a button in the upper right corner for downloading.
 
@@ -102,22 +101,20 @@ Share the webhook URL with your members.
 
 ### Instructions for use:
 1. In the text box of the launched software, enter
-  The address where the VRChat image folder is located
-  Enter the URL of the shared Discord webhook.
+  ・The address where the VRChat image folder is located
+  ・Enter the URL of the shared Discord webhook.
   in the text box
 
 2. Press the "Start Monitoring" button.
-The next time you start up the software, it will be loaded at startup, so you don't need to set it up.
+  The next time you start up the software, it will be loaded at startup, so you don't need to set it up.
 ### Turn on the log output in the debug information from the VRChat settings.
 
 #### 使用说明
-在启动软件的文本框中输入
-  VRChat 图像文件夹所在的地址。
-  在启动软件的文本框中输入共享的 Discord 网络钩子 URL
-  2. 按 “开始监控 ”按钮。
-
-按 “开始监控 ”按钮。
-下次启动软件时，软件将在启动时加载，您无需进行设置。
+1.在启动软件的文本框中输入
+  ・VRChat 图像文件夹所在的地址。
+  ・在启动软件的文本框中输入共享的 Discord 网络钩子 URL
+2. 按 “开始监控 ”按钮。
+  下次启动软件时，软件将在启动时加载，您无需进行设置。
 #### *在 VRChat 设置的调试信息中打开日志输出。
 
 ### 사용 방법
@@ -127,7 +124,7 @@ The next time you start up the software, it will be loaded at startup, so you do
   를 입력한다.
 
 2. 모니터링 시작 버튼을 누릅니다.
-다음부터는 실행 시 자동으로 설정이 되므로 따로 설정할 필요가 없습니다.
+  다음부터는 실행 시 자동으로 설정이 되므로 따로 설정할 필요가 없습니다.
 ### ※VRChat 설정에서 디버깅 정보에 있는 로그 출력을 ON으로 설정해 주세요.
 # プレビュー
 ![スクリーンショット 2024-12-22 003218](https://github.com/user-attachments/assets/6058fad9-30de-48b4-a172-ee50e746e921)
