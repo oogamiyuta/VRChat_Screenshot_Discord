@@ -4,6 +4,7 @@ VRChatでの冒険をさらに楽しく！
 このソフトは、あなたがVRChatで撮影した素敵なスクリーンショットを、ワールド名と一緒に自動でDiscordに送信してくれる便利なツールです。
 どのワールドで何を撮ったのか、すぐに仲間とシェアして、一緒にその瞬間を楽しむことができます。
 シンプルで直感的な操作で、VRChatでの思い出をもっと気軽に、そして魅力的に共有しましょう！
+
 🎉 **Boothにて配布＆販売中！**  
 このツールでVRChatの体験をもっと楽しく！🚀  
 👉 [Boothはこちら](https://yuta-vtuber.booth.pm/items/6396052)
@@ -12,6 +13,7 @@ Get ready to take your VRChat adventures to the next level!
  This awesome software automatically sends the cool screenshots you've taken in VRChat to Discord along with the world name. 
  You can instantly share your creations with friends, reliving the magic of the moment and making memories that last! 
  Share your VRChat memories more easily and engagingly with simple and intuitive operations!
+
 🎉 **Now available on Booth!**  
 Make your VRChat experience even more exciting! 🚀  
 👉 [Check it out on Booth](https://yuta-vtuber.booth.pm/items/6396052)
@@ -20,6 +22,7 @@ Make your VRChat experience even more exciting! 🚀
  该软件是一款方便实用的工具，可自动将您在 VRChat 中拍摄的所有精美截图连同世界名称一起发送到 Discord。
  您可以立即与朋友分享您在哪个世界中拍摄的截图，共同享受这一时刻。
  通过简单直观的操作，您可以更轻松、更投入地分享您的 VRChat 记忆！
+
 🎉 **现已在Booth上提供！**  
 让您的VRChat体验更加精彩！🚀  
 👉 [点击这里查看](https://yuta-vtuber.booth.pm/items/6396052)
@@ -28,7 +31,7 @@ Make your VRChat experience even more exciting! 🚀
  이 소프트웨어는 당신이 VRChat에서 촬영한 멋진 스크린샷을 월드 이름과 함께 Discord에 자동으로 전송해 주는 편리한 도구입니다. 
  어떤 월드에서 무엇을 찍었는지 바로 동료들과 공유하여 그 순간을 함께 즐길 수 있습니다. 
  간단하고 직관적인 조작으로 VRChat에서의 추억을 더욱 쉽고 매력적으로 공유할 수 있습니다!
- ### 한국어 (Korean)  
+  
 🎉 **Booth에서 배포 및 판매 중!**  
 VRChat 경험을 더욱 즐겁게 만드세요! 🚀  
 👉 [Booth 링크](https://yuta-vtuber.booth.pm/items/6396052)
