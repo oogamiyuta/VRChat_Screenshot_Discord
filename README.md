@@ -1,5 +1,7 @@
 # VSD(VRChat_Screenshot_Discord）
-
+---
+日本語
+---
 VRChatでの冒険をさらに楽しく！  
 このソフトは、あなたがVRChatで撮影した素敵なスクリーンショットを、ワールド名と一緒に自動でDiscordに送信してくれる便利なツールです。  
 どのワールドで何を撮ったのか、すぐに仲間とシェアして、一緒にその瞬間を楽しむことができます。  
@@ -8,9 +10,11 @@ VRChatでの冒険をさらに楽しく！
 🎉 **Boothにて配布＆販売中！**  
 このツールでVRChatの体験をもっと楽しく！🚀  
 👉 [Boothはこちら](https://yuta-vtuber.booth.pm/items/6396052)  
-
+👉[マニュアルはこちらから](https://docs.google.com/document/d/14dMVd8EGtMno6WoyTJy1ply1nl4FLZevTR6Idnh23lc/edit?usp=sharing)   
+![スクリーンショット 2024-12-22 021110](https://github.com/user-attachments/assets/136fb0f8-23fa-4950-9edd-875f985ee093)![スクリーンショット 2024-12-24 030039](https://github.com/user-attachments/assets/cfee5079-bae5-46fa-9449-784990df9a8f)   
 ---
-
+English
+---
 Get ready to take your VRChat adventures to the next level!  
 This awesome software automatically sends the cool screenshots you've taken in VRChat to Discord along with the world name.  
 You can instantly share your creations with friends, reliving the magic of the moment and making memories that last!  
@@ -19,19 +23,23 @@ Share your VRChat memories more easily and engagingly with simple and intuitive 
 🎉 **Now available on Booth!**  
 Make your VRChat experience even more exciting! 🚀  
 👉 [Check it out on Booth](https://yuta-vtuber.booth.pm/items/6396052)  
-
+👉 [Click here for the manual](https://docs.google.com/document/d/14dMVd8EGtMno6WoyTJy1ply1nl4FLZevTR6Idnh23lc/edit?usp=sharing)   
+![スクリーンショット 2024-12-22 021138](https://github.com/user-attachments/assets/7e94485a-dd04-4f30-acf7-c8e89c5ede7a)![スクリーンショット 2024-12-24 030844](https://github.com/user-attachments/assets/e4ee12f8-608e-4654-a16a-7a472a32a164)
 ---
-
+简体中文
+---
 让您的 VRChat 探险更加有趣！  
 该软件是一款方便实用的工具，可自动将您在 VRChat 中拍摄的所有精美截图连同世界名称一起发送到 Discord。  
-您可以立即与朋友分享您在哪个世界中拍摄的截图，共同享受这一时刻。
+您可以立即与朋友分享您在哪个世界中拍摄的截图，共同享受这一时刻。  
 
 🎉 **现已在Booth上提供！**  
 让您的VRChat体验更加精彩！🚀  
 👉 [点击这里查看](https://yuta-vtuber.booth.pm/items/6396052)  
-
+👉 [点击这里查看手册](https://docs.google.com/document/d/14dMVd8EGtMno6WoyTJy1ply1nl4FLZevTR6Idnh23lc/edit?usp=sharing)   
+![スクリーンショット 2024-12-22 021437](https://github.com/user-attachments/assets/af70a0d6-6bd8-4477-8e12-af8160cae58d)![スクリーンショット 2024-12-24 031016](https://github.com/user-attachments/assets/c3486a95-42d3-4ef9-97ae-9eba0f103329)
 ---
-
+한국어
+---
 VRChat에서의 모험을 더욱 즐겁게!  
 이 소프트웨어는 당신이 VRChat에서 촬영한 멋진 스크린샷을 월드 이름과 함께 Discord에 자동으로 전송해 주는 편리한 도구입니다.  
 어떤 월드에서 무엇을 찍었는지 바로 동료들과 공유하여 그 순간을 함께 즐길 수 있습니다.  
@@ -40,136 +48,9 @@ VRChat에서의 모험을 더욱 즐겁게!
 🎉 **Booth에서 배포 및 판매 중!**  
 VRChat 경험을 더욱 즐겁게 만드세요! 🚀  
 👉 [Booth 링크](https://yuta-vtuber.booth.pm/items/6396052)  
-
+👉 [여기를 클릭하여 매뉴얼 확인](https://docs.google.com/document/d/14dMVd8EGtMno6WoyTJy1ply1nl4FLZevTR6Idnh23lc/edit?usp=sharing)   
+![スクリーンショット 2024-12-22 021406](https://github.com/user-attachments/assets/5729fc9b-1c1c-4d63-82a9-054650fd2dde)![スクリーンショット 2024-12-24 031440](https://github.com/user-attachments/assets/2a3f53b8-c193-43fd-98a4-b69a24b09280)   
 ---
 
-## 環境設定方法 / Here's how to set up the environment. / 如何设置环境 环境 / 설정 방법
 
-### サーバー管理者(権限持ち)のお仕事 ※初回のみ  
-1. Discordにチャンネルを作成  
-2. チャンネルの設定を開き、連携サービスのウェブフックを開く  
-3. 新しいウェブフックを作成  
-4. お好みで名前とアイコンを設定し、投稿先のチャンネルを確認  
-5. "ウェブフックURLをコピー"をクリック  
-6. メンバーにウェブフックURLを共有  
-
-### Server Admin (with privileges) *First time only  
-1. Create a channel on Discord.  
-2. Open the channel settings and open the webhook of the linked service.  
-3. Create a new webhook.  
-4. Set a name and icon of your choice, and confirm the channel you want to post to.  
-5. Click "Copy Webhook URL."  
-6. Share the webhook URL with your members.  
-
-### 服务器管理员（有权限） *仅限首次使用  
-1. 在 Discord 上创建一个频道。  
-2. 打开频道设置并打开链接服务的网络钩子  
-3. 创建一个新的网络钩子  
-4. 设置您选择的名称和图标，并确认要发布到的频道  
-5. 点击 "复制网络钩子 URL"  
-6. 与您的成员共享网络钩子 URL  
-
-### 서버 관리자(권한 보유자) 업무 ※ 최초 1회만 해당됩니다.  
-1. Discord에 채널 생성  
-2. 채널 설정을 열고 연동 서비스 웹훅을 엽니다.  
-3. 새로운 웹훅 생성  
-4. 원하는 대로 이름과 아이콘을 설정하고, 게시할 채널을 확인합니다.  
-5. “웹훅 URL 복사”를 클릭한다.  
-6. 회원에게 웹훅 URL 공유하기  
-
----
-
-## ソフト側の設定 / Here are the software settings. / 软件方面的设置 / 소프트웨어 설정  
-![更新ありダイアログ-1](https://github.com/user-attachments/assets/17440c11-86dc-43bc-917b-c95c229e8c97)  
-![更新あり](https://github.com/user-attachments/assets/378dbc35-34cd-4446-be82-3f9e2cfddc74)  
-
-### 起動時、更新通知がある場合  
-・更新がある場合、起動時にダイアログが出ます。ダウンロードする場合は”はい”を選んでください。  
-・また、タイトルに更新通知が表示され、右上にダウンロード用のボタンがあります。  
-
-### When you first start up your computer, if there is a notification about an update  
-・If there are updates, a dialog box will appear when you start the program. Click "Yes" to download them.  
-・The title of the file will also display an update notification, and there will be a button in the upper right corner for downloading.  
-
-### 启动时，如果有更新通知  
-・如果有更新，启动时会出现一个对话框。 选择 “是”即可下载  
-・此外，标题中还会显示更新通知，右上角还有一个下载按钮  
-
-### 시작 시 업데이트 알림이 있는 경우  
-・업데이트가 있는 경우, 시작 시 대화창이 나옵니다. 다운로드하려면 “예”를 선택해 주십시오.  
-・또한, 제목에 업데이트 알림이 표시되고 오른쪽 상단에 다운로드 버튼이 있습니다.  
-
----
-
-### 使用手順  
-1. 起動したソフトのテキストボックスに  
-  ・VRChatの画像フォルダがあるアドレス  
-  ・共有されたDiscordのウェブフックURL  
-  を入力する  
-
-2. 監視開始ボタンを押す  
-  次回からは起動時に読み込まれるので設定はいらないです。  
-
-### ※VRChatの設定から、デバック情報にあるログ出力をONにしてください。  
-![image](https://github.com/user-attachments/assets/a80fdddd-03ba-4e1c-8092-3f6adbc0fa67)  
-
----
-
-### Instructions for use:  
-1. In the text box of the launched software, enter  
-  ・The address where the VRChat image folder is located  
-  ・Enter the URL of the shared Discord webhook.  
-
-2. Press the "Start Monitoring" button.  
-  The next time you start up the software, it will be loaded at startup, so you don't need to set it up.  
-
-### Turn on the log output in the debug information from the VRChat settings.  
-
----
-
-#### 使用说明  
-1. 在启动软件的文本框中输入  
-  ・VRChat 图像文件夹所在的地址。  
-  ・在启动软件的文本框中输入共享的 Discord 网络钩子 URL  
-
-2. 按 “开始监控” 按钮。  
-  下次启动软件时，软件将在启动时加载，您无需进行设置。  
-
-#### *在 VRChat 设置的调试信息中打开日志输出。  
-
----
-
-### 사용 방법  
-1. 실행한 소프트웨어의 텍스트 상자에  
-  VRChat의 이미지 폴더가 있는 주소  
-  공유된 Discord의 웹후크 URL을 입력합니다.  
-
-2. 모니터링 시작 버튼을 누릅니다.  
-  다음부터는 실행 시 자동으로 설정이 되므로 따로 설정할 필요가 없습니다.  
-
-### ※VRChat 설정에서 디버깅 정보에 있는 로그 출력을 ON으로 설정해 주세요.  
-
----
-
-# プレビュー  
-![スクリーンショット 2024-12-22 003218](https://github.com/user-attachments/assets/6058fad9-30de-48b4-a172-ee50e746e921)  
-![image](https://github.com/user-attachments/assets/c3780197-eebb-4acd-a2de-12f1e2a2c4c1)  
-
----
-
-# Preview  
-![スクリーンショット 2024-12-22 003130](https://github.com/user-attachments/assets/c6f9e1f0-499f-4054-81d0-534f7ecd1644)  
-![image](https://github.com/user-attachments/assets/0e458d44-fe55-49dd-a560-77f440e1ca25)  
-
----
-
-# 预览。  
-![スクリーンショット 2024-12-22 003411](https://github.com/user-attachments/assets/1d3bbff8-4fd1-47c6-9a32-dac532360cde)  
-![image](https://github.com/user-attachments/assets/3c51d762-6712-4e4d-821a-535ec8107886)  
-
----
-
-# 미리보기  
-![スクリーンショット 2024-12-22 003305](https://github.com/user-attachments/assets/bca02d29-7182-495e-aa72-6b9662236811)  
-![スクリーンショット 2024-12-22 021406](https://github.com/user-attachments/assets/b559533c-1e28-4d25-bee1-0f9fd7393083)
 
