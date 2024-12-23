@@ -207,4 +207,16 @@
   <data name="DiscordSendErrorMessage" xml:space="preserve">
     <value>Discord 전송 중 오류 발생</value>
   </data>
+  <data name="onoff" xml:space="preserve">
+    <value>켜짐/꺼짐</value>
+  </data>
+  <data name="servername" xml:space="preserve">
+    <value>수신자 이름</value>
+  </data>
+  <data name="Page1" xml:space="preserve">
+    <value>메인 페이지</value>
+  </data>
+  <data name="Page2" xml:space="preserve">
+    <value>Webhook 설정</value>
+  </data>
 </root>

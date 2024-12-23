@@ -207,4 +207,16 @@
   <data name="DiscordSendErrorMessage" xml:space="preserve">
     <value>发送到Discord时发生错误</value>
   </data>
+  <data name="onoff" xml:space="preserve">
+    <value>开/关</value>
+  </data>
+  <data name="servername" xml:space="preserve">
+    <value>接收方名称</value>
+  </data>
+  <data name="Page1" xml:space="preserve">
+    <value>主页</value>
+  </data>
+  <data name="Page2" xml:space="preserve">
+    <value>Webhook 设置</value>
+  </data>
 </root>

@@ -103,9 +103,9 @@ Namespace My.Resources
         '''<summary>
         '''  Discord送信失敗 に類似しているローカライズされた文字列を検索します。
         '''</summary>
-        Friend Shared ReadOnly Property DiscordSendFailureMessage_() As String
+        Friend Shared ReadOnly Property DiscordSendFailureMessage() As String
             Get
-                Return ResourceManager.GetString("DiscordSendFailureMessage ", resourceCulture)
+                Return ResourceManager.GetString("DiscordSendFailureMessage", resourceCulture)
             End Get
         End Property
         
@@ -121,9 +121,9 @@ Namespace My.Resources
         '''<summary>
         '''  エラー に類似しているローカライズされた文字列を検索します。
         '''</summary>
-        Friend Shared ReadOnly Property ErrorOccurredMessage_() As String
+        Friend Shared ReadOnly Property ErrorOccurredMessage() As String
             Get
-                Return ResourceManager.GetString("ErrorOccurredMessage ", resourceCulture)
+                Return ResourceManager.GetString("ErrorOccurredMessage", resourceCulture)
             End Get
         End Property
         
@@ -256,9 +256,45 @@ Namespace My.Resources
         '''<summary>
         '''  新しい画像がアップロードされました  に類似しているローカライズされた文字列を検索します。
         '''</summary>
-        Friend Shared ReadOnly Property NewImageUploadedMessage_() As String
+        Friend Shared ReadOnly Property NewImageUploadedMessage() As String
             Get
-                Return ResourceManager.GetString("NewImageUploadedMessage ", resourceCulture)
+                Return ResourceManager.GetString("NewImageUploadedMessage", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  有効/無効 に類似しているローカライズされた文字列を検索します。
+        '''</summary>
+        Friend Shared ReadOnly Property onoff() As String
+            Get
+                Return ResourceManager.GetString("onoff", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  メイン に類似しているローカライズされた文字列を検索します。
+        '''</summary>
+        Friend Shared ReadOnly Property Page1() As String
+            Get
+                Return ResourceManager.GetString("Page1", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Webhook設定 に類似しているローカライズされた文字列を検索します。
+        '''</summary>
+        Friend Shared ReadOnly Property Page2() As String
+            Get
+                Return ResourceManager.GetString("Page2", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  送信先の名前 に類似しているローカライズされた文字列を検索します。
+        '''</summary>
+        Friend Shared ReadOnly Property servername() As String
+            Get
+                Return ResourceManager.GetString("servername", resourceCulture)
             End Get
         End Property
         

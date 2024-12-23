@@ -207,4 +207,16 @@
   <data name="DiscordSendErrorMessage" xml:space="preserve">
     <value>Error sending to Discord</value>
   </data>
+  <data name="onoff" xml:space="preserve">
+    <value>On/Off</value>
+  </data>
+  <data name="servername" xml:space="preserve">
+    <value>Recipient Name</value>
+  </data>
+  <data name="Page1" xml:space="preserve">
+    <value>Main Page</value>
+  </data>
+  <data name="Page2" xml:space="preserve">
+    <value>Webhook Settings</value>
+  </data>
 </root>
