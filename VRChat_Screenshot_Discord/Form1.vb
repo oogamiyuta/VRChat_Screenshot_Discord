@@ -20,7 +20,8 @@ Public Class Form1
 
         ' 設定値の読み込み
         TextBox1.Text = ConfigurationManager.AppSettings("FolderPath")
-        TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
+        ' TextBox2 は削除されたため、DataGridView1 から WebhookUrl を取得するように変更
+        ' TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
 
         ' 言語リストをComboBoxに追加
         LoadLanguages()
@@ -33,6 +34,9 @@ Public Class Form1
 
         ' GitHubのバージョンチェック
         CheckGitHubVersion()
+
+        ' DataGridViewの内容をロード
+        LoadDataGridView()
     End Sub
 
     Private Sub LoadLanguages()
@@ -67,11 +71,18 @@ Public Class Form1
         AddHandler UpdateLinkButton.Click, AddressOf OpenUpdateLink
     End Sub
 
-    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    Private Async Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         Dim folderPath As String = TextBox1.Text
-        Dim webhookUrl As String = TextBox2.Text
+        Dim webhookUrls As New List(Of String)
 
-        If String.IsNullOrWhiteSpace(folderPath) OrElse String.IsNullOrWhiteSpace(webhookUrl) Then
+        ' DataGridView1 から WebhookUrl を取得
+        For Each row As DataGridViewRow In DataGridView1.Rows
+            If Not row.IsNewRow AndAlso CBool(row.Cells("onoff").Value) Then
+                webhookUrls.Add(row.Cells("WebHookURL").Value.ToString())
+            End If
+        Next
+
+        If String.IsNullOrWhiteSpace(folderPath) OrElse webhookUrls.Count = 0 Then
             MessageBox.Show(GetLocalizedString("FolderPathInputMessage"))
             Return
         End If
@@ -82,7 +93,7 @@ Public Class Form1
         End If
 
         SaveSettings("FolderPath", folderPath)
-        SaveSettings("WebhookUrl", webhookUrl)
+        ' WebhookUrl の保存は DataGridView1 の内容に基づいて行う必要があります
 
         watcher = New FileSystemWatcher()
         watcher.Path = folderPath
@@ -95,10 +106,10 @@ Public Class Form1
         InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("StartWatchingMessage") & ": " & folderPath))
     End Sub
 
-    Private Sub CheckGitHubVersion()
+    Private Async Sub CheckGitHubVersion()
         Try
             Dim currentVersion As String = NormalizeVersion(GetCurrentVersion())
-            Dim latestVersion As String = GetLatestGitHubVersion()
+            Dim latestVersion As String = Await GetLatestGitHubVersionAsync()
 
             latestVersion = latestVersion.Replace("Ver.", "").Trim()
 
@@ -107,16 +118,15 @@ Public Class Form1
                 UpdateLinkButton.Visible = True
 
                 Dim message As String = String.Format(
-    GetLocalizedString("UpdateAvailableMessage").Replace("{currentVersion}", currentVersion).Replace("{latestVersion}", latestVersion) &
-    Environment.NewLine & GetLocalizedString("UpdateDownloadMessage").Replace("{latestVersion}", latestVersion),
-    currentVersion, latestVersion)
-
+                    GetLocalizedString("UpdateAvailableMessage").Replace("{currentVersion}", currentVersion).Replace("{latestVersion}", latestVersion) &
+                    Environment.NewLine & GetLocalizedString("UpdateDownloadMessage").Replace("{latestVersion}", latestVersion),
+                    currentVersion, latestVersion)
 
                 Dim result As DialogResult = MessageBox.Show(message,
-                GetLocalizedString("UpdateCheckTitle"),
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Exclamation,
-                MessageBoxDefaultButton.Button1)
+                    GetLocalizedString("UpdateCheckTitle"),
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Exclamation,
+                    MessageBoxDefaultButton.Button1)
 
                 If result = DialogResult.Yes Then
                     OpenUpdateLink(Nothing, Nothing)
@@ -172,10 +182,10 @@ Public Class Form1
         Return Assembly.GetExecutingAssembly().GetName().Version.ToString()
     End Function
 
-    Private Function GetLatestGitHubVersion() As String
+    Private Async Function GetLatestGitHubVersionAsync() As Task(Of String)
         Dim url As String = "https://api.github.com/repos/oogamiyuta/VRChat_Screenshot_Discord/releases/latest"
         httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MyApp")
-        Dim response = httpClient.GetStringAsync(url).Result
+        Dim response = Await httpClient.GetStringAsync(url)
         Dim jsonResponse = JsonConvert.DeserializeObject(Of Dictionary(Of String, Object))(response)
 
         Return jsonResponse("tag_name").ToString()
@@ -186,7 +196,7 @@ Public Class Form1
         Return If(match.Success, match.Groups(1).Value, "")
     End Function
 
-    Private Sub OnNewImageCreated(sender As Object, e As FileSystemEventArgs)
+    Private Async Sub OnNewImageCreated(sender As Object, e As FileSystemEventArgs)
         ' 画像が追加された際にログファイルを確認し、ワールド名を抽出
         Try
             Dim baseLogFolder As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData).Replace("Local", "LocalLow"), "VRChat", "VRChat")
@@ -208,15 +218,20 @@ Public Class Form1
             If latestLogFile IsNot Nothing Then
                 Dim worldName As String = ExtractWorldNameFromLog(latestLogFile)
                 If Not String.IsNullOrEmpty(worldName) Then
-                    SendToDiscord(TextBox2.Text, worldName, e.FullPath)
+                    ' DataGridView1 から WebhookUrl を取得して送信
+                    For Each row As DataGridViewRow In DataGridView1.Rows
+                        If Not row.IsNewRow AndAlso CBool(row.Cells("onoff").Value) Then
+                            Dim serverName As String = row.Cells("servername").Value.ToString()
+                            Dim webhookUrl As String = row.Cells("WebHookURL").Value.ToString()
+                            Await SendToDiscord(webhookUrl, worldName, e.FullPath, serverName)
+                        End If
+                    Next
                 End If
             End If
         Catch ex As Exception
             InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("ErrorOccurredMessage") & ": " & ex.Message))
         End Try
     End Sub
-
-
 
     Private Sub InvokeIfRequired(action As Action)
         If InvokeRequired Then
@@ -234,7 +249,7 @@ Public Class Form1
         Return ConfigurationManager.AppSettings("Language")
     End Function
 
-    Private Sub ComboBoxLanguage_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLanguage.SelectedIndexChanged
+    Private Async Sub ComboBoxLanguage_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLanguage.SelectedIndexChanged
         ' インデックスで言語を判定
         Select Case ComboBoxLanguage.SelectedIndex
             Case 0 : currentLanguage = "ja"
@@ -248,8 +263,10 @@ Public Class Form1
         UpdateUIForLanguage()
         ' フォームタイトル（Me.Text）も更新
         Dim currentVersion As String = GetCurrentVersion()
-        Dim latestVersion As String = GetLatestGitHubVersion()
+        Dim latestVersion As String = Await GetLatestGitHubVersionAsync()
         latestVersion = latestVersion.Replace("Ver.", "").Trim()
+        DataGridView1.Columns("onoff").HeaderText = GetLocalizedString("onoff")
+        DataGridView1.Columns("servername").HeaderText = GetLocalizedString("servername")
 
         If currentVersion <> latestVersion Then
             ' 更新がある場合
@@ -265,6 +282,8 @@ Public Class Form1
         Label2.Text = GetLocalizedString("Label2")
         Button1.Text = GetLocalizedString("start")
         UpdateLinkButton.Text = GetLocalizedString("UpdateDownloadButtonText")
+        TabControl1.TabPages(0).Text = GetLocalizedString("Page1")
+        TabControl1.TabPages(1).Text = GetLocalizedString("Page2")
     End Sub
 
     Private Function ExtractWorldNameFromLog(logFilePath As String) As String
@@ -292,7 +311,7 @@ Public Class Form1
         Return String.Empty
     End Function
 
-    Private Async Sub SendToDiscord(webhookUrl As String, worldName As String, imagePath As String)
+    Private Async Function SendToDiscord(webhookUrl As String, worldName As String, imagePath As String, serverName As String) As Task
         Try
             Dim captureTime As String = File.GetCreationTime(imagePath).ToString("yyyy-MM-dd HH:mm:ss")
 
@@ -321,14 +340,78 @@ Public Class Form1
 
             Dim response = Await httpClient.PostAsync(webhookUrl, multipartContent)
             If response.IsSuccessStatusCode Then
-                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendSuccessMessage") & ": " & worldName))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendSuccessMessage") & ": " & serverName & " - " & worldName))
             Else
-                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendFailureMessage") & ": " & response.StatusCode))
+                InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendFailureMessage") & ": " & serverName & " - " & response.StatusCode))
             End If
         Catch ex As Exception
-            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendErrorMessage") & ": " & ex.Message))
+            InvokeIfRequired(Sub() ListBox1.Items.Add(GetLocalizedString("DiscordSendErrorMessage") & ": " & serverName & " - " & ex.Message))
         End Try
+    End Function
+
+    Private Sub LoadDataGridView()
+        Dim filePath As String = Path.Combine(Application.StartupPath, "DataGridViewData.json")
+        Dim dataTable As New DataTable()
+        ' DataTableの列を明示的に定義
+        dataTable.Columns.Add("onoff", GetType(Boolean))
+        dataTable.Columns.Add("servername", GetType(String))
+        dataTable.Columns.Add("WebHookURL", GetType(String))
+
+        If File.Exists(filePath) Then
+            Dim jsonData As String = File.ReadAllText(filePath)
+            Dim rows = JsonConvert.DeserializeObject(Of List(Of Dictionary(Of String, Object)))(jsonData)
+            For Each row In rows
+                Dim dataRow = dataTable.NewRow()
+                dataRow("onoff") = Convert.ToBoolean(row("onoff"))
+                dataRow("servername") = Convert.ToString(row("servername"))
+                dataRow("WebHookURL") = Convert.ToString(row("WebHookURL"))
+                dataTable.Rows.Add(dataRow)
+            Next
+        Else
+
+        End If
+
+        DataGridView1.DataSource = dataTable
+
+        DataGridView1.Columns("onoff").HeaderText = GetLocalizedString("onoff")
+        DataGridView1.Columns("servername").HeaderText = GetLocalizedString("servername")
+        DataGridView1.Columns(0).AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
+        DataGridView1.Columns(1).AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
+        DataGridView1.Columns(2).AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
     End Sub
 
+    Private Sub SaveDataGridView()
+        Dim dataTable As New DataTable()
+        ' DataTableの列を明示的に定義
+        dataTable.Columns.Add("onoff", GetType(Boolean))
+        dataTable.Columns.Add("servername", GetType(String))
+        dataTable.Columns.Add("WebHookURL", GetType(String))
+        For Each row As DataGridViewRow In DataGridView1.Rows
+            If Not row.IsNewRow Then
+                Dim dataRow As DataRow = dataTable.NewRow()
+                dataRow("onoff") = row.Cells("onoff").Value
+                dataRow("servername") = row.Cells("servername").Value
+                dataRow("WebHookURL") = row.Cells("WebHookURL").Value
+                dataTable.Rows.Add(dataRow)
+            End If
+        Next
+        Dim jsonData As String = JsonConvert.SerializeObject(dataTable, Formatting.Indented)
+        Dim filePath As String = Path.Combine(Application.StartupPath, "DataGridViewData.json")
+        File.WriteAllText(filePath, jsonData)
+    End Sub
+
+    Protected Overrides Sub OnFormClosing(e As FormClosingEventArgs)
+        MyBase.OnFormClosing(e)
+        ' リソースの解放
+        If watcher IsNot Nothing Then
+            watcher.Dispose()
+        End If
+        If httpClient IsNot Nothing Then
+            httpClient.Dispose()
+        End If
+        ' DataGridViewの内容をセーブ
+        SaveDataGridView()
+    End Sub
 
 End Class
+
