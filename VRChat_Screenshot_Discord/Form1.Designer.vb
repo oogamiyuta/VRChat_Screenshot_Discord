@@ -32,6 +32,7 @@ Partial Class Form1
         ComboBoxLanguage = New ComboBox()
         TabControl1 = New TabControl()
         TabPage1 = New TabPage()
+        Compression = New CheckBox()
         TabPage2 = New TabPage()
         DataGridView1 = New DataGridView()
         TabControl1.SuspendLayout()
@@ -119,6 +120,7 @@ Partial Class Form1
         ' 
         ' TabPage1
         ' 
+        TabPage1.Controls.Add(Compression)
         TabPage1.Controls.Add(ListBox1)
         TabPage1.Controls.Add(Button1)
         TabPage1.Controls.Add(Label2)
@@ -133,6 +135,16 @@ Partial Class Form1
         TabPage1.TabIndex = 0
         TabPage1.Text = "TabPage1"
         TabPage1.UseVisualStyleBackColor = True
+        ' 
+        ' Compression
+        ' 
+        Compression.AutoSize = True
+        Compression.Location = New Point(6, 9)
+        Compression.Name = "Compression"
+        Compression.Size = New Size(80, 19)
+        Compression.TabIndex = 9
+        Compression.Text = "10MB圧縮"
+        Compression.UseVisualStyleBackColor = True
         ' 
         ' TabPage2
         ' 
@@ -187,4 +199,5 @@ Partial Class Form1
     Friend WithEvents TabPage2 As TabPage
     Friend WithEvents DataGridView1 As DataGridView
     Public WithEvents TabControl1 As TabControl
+    Friend WithEvents Compression As CheckBox
 End Class

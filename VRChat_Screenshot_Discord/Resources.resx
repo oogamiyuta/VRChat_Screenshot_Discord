@@ -219,4 +219,7 @@
   <data name="Page2" xml:space="preserve">
     <value>Webhook設定</value>
   </data>
+  <data name="10MBCompression" xml:space="preserve">
+    <value>10MB圧縮</value>
+  </data>
 </root>

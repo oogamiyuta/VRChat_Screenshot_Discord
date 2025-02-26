@@ -5,6 +5,8 @@ Imports System.Text.RegularExpressions
 Imports System.Configuration
 Imports Newtonsoft.Json
 Imports System.Reflection
+Imports System.Drawing
+Imports System.Drawing.Imaging
 
 Public Class Form1
     Private watcher As FileSystemWatcher
@@ -20,6 +22,13 @@ Public Class Form1
 
         ' 設定値の読み込み
         TextBox1.Text = ConfigurationManager.AppSettings("FolderPath")
+        ' Compression チェックボックスの初期状態を設定
+        Dim compressionSetting As String = ConfigurationManager.AppSettings("Compression")
+        If String.IsNullOrEmpty(compressionSetting) Then
+            Compression.Checked = True ' デフォルトでON
+        Else
+            Compression.Checked = Convert.ToBoolean(compressionSetting)
+        End If
         ' TextBox2 は削除されたため、DataGridView1 から WebhookUrl を取得するように変更
         ' TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
 
@@ -267,6 +276,7 @@ Public Class Form1
         latestVersion = latestVersion.Replace("Ver.", "").Trim()
         DataGridView1.Columns("onoff").HeaderText = GetLocalizedString("onoff")
         DataGridView1.Columns("servername").HeaderText = GetLocalizedString("servername")
+        Compression.Text = GetLocalizedString("10MBCompression")
 
         If currentVersion <> latestVersion Then
             ' 更新がある場合
@@ -332,11 +342,96 @@ Public Class Form1
             Dim jsonString As String = JsonConvert.SerializeObject(jsonPayload)
             Dim content = New StringContent(jsonString, Encoding.UTF8, "application/json")
 
-            ' 画像を添付する
+            ' リクエストの作成
             Dim boundary As String = "----WebKitFormBoundary" & DateTime.Now.Ticks.ToString("x")
             Dim multipartContent = New MultipartFormDataContent(boundary)
             multipartContent.Add(content, "payload_json")
-            multipartContent.Add(New ByteArrayContent(File.ReadAllBytes(imagePath)), "file", Path.GetFileName(imagePath))
+
+            ' 画像の容量
+            Dim originalFileSize As Long = New FileInfo(imagePath).Length
+            ' Discordの上限容量
+            Dim targetFileSize As Long = 10 * 1024 * 1024 ' 10MB
+
+            ' Discordの上限を超えたら画像を圧縮する(チェックボックスがONのとき)
+            If originalFileSize > targetFileSize And Compression.Checked = True Then
+                ' 初期圧縮率は100%
+                Dim quality As Long = 100
+
+                ' 圧縮率の決め打ちで圧縮をかける(処理は少ないが，画質の劣化が激しい)
+                ' Using originalImage As Image = Image.FromFile(imagePath)
+                '     ' https://qiita.com/sonoshou/items/4e7d58ee3124973085bc
+                '     quality = ((targetFileSize / 1024) / Math.Sqrt(3 * originalImage.Width * originalImage.Height)) * 100
+                '     Dim jpegEncoder As ImageCodecInfo = ImageCodecInfo.GetImageDecoders().First(Function(c) c.FormatID = ImageFormat.Jpeg.Guid)
+                '     Dim encoderParams As New EncoderParameters(1)
+                '     encoderParams.Param(0) = New EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality)
+
+                '     ' メモリストリームに書き出して添付する
+                '     Using ms As New MemoryStream()
+                '         originalImage.Save(ms, jpegEncoder, encoderParams)
+                '         ms.Seek(0, SeekOrigin.Begin)
+
+                '         ' 圧縮した画像を添付する
+                '         multipartContent.Add(New ByteArrayContent(ms.ToArray()), "file", Path.GetFileName(imagePath))
+
+                '         ' デバッグ用メッセージ
+                '         ' 圧縮後のファイルサイズを取得
+                '         ' Dim compressedFileSize As Long = ms.Length
+                '         ' InvokeIfRequired(Sub() ListBox1.Items.Add("originalImage: " & Math.Floor(originalFileSize / 10e5 * 100) / 100 & "MB compressedImage: " & Math.Floor(compressedFileSize / 10e5 * 100) / 100 & "MB quality: " & quality & "%"))
+                '     End Using
+                ' End Using
+
+
+                ' ' 圧縮後のファイルサイズによって２部探索で圧縮率を決定する
+                Dim minQuality As Long = 10
+                Dim maxQuality As Long = 100
+                Dim jpegEncoder As ImageCodecInfo = ImageCodecInfo.GetImageDecoders().First(Function(c) c.FormatID = ImageFormat.Jpeg.Guid)
+
+                Using originalImage As Image = Image.FromFile(imagePath)
+
+                    ' 二分探索で最適な品質を探す
+                    While minQuality <= maxQuality
+                        Dim midQuality As Long = (minQuality + maxQuality) / 2
+
+                        Dim encoderParams As New EncoderParameters(1)
+                        encoderParams.Param(0) = New EncoderParameter(System.Drawing.Imaging.Encoder.Quality, midQuality)
+
+                        Using ms As New MemoryStream()
+                            originalImage.Save(ms, jpegEncoder, encoderParams)
+                            Dim fileSize As Long = ms.Length
+
+                            If fileSize <= targetFileSize Then
+                                quality = midQuality
+                                minQuality = midQuality + 1
+                            Else
+                                maxQuality = midQuality - 1
+                            End If
+                        End Using
+                    End While
+
+                    ' 最適な品質で保存
+                    Dim finalParams As New EncoderParameters(1)
+                    finalParams.Param(0) = New EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality)
+
+                    ' メモリストリームに書き出して添付する
+                    Using ms As New MemoryStream()
+                        originalImage.Save(ms, jpegEncoder, finalParams)
+                        ms.Seek(0, SeekOrigin.Begin)
+
+                        ' 圧縮した画像を添付する
+                        multipartContent.Add(New ByteArrayContent(ms.ToArray()), "file", Path.GetFileName(imagePath))
+
+                        ' デバッグ用メッセージ
+                        ' 圧縮後のファイルサイズを取得
+                        ' Dim compressedFileSize As Long = ms.Length
+                        ' InvokeIfRequired(Sub() ListBox1.Items.Add("originalImage: " & Math.Floor(originalFileSize / 10e5 * 100) / 100 & "MB compressedImage: " & Math.Floor(compressedFileSize / 10e5 * 100) / 100 & "MB quality: " & quality & "%"))
+                    End Using
+
+                End Using
+
+            Else
+                ' 画像を添付する
+                multipartContent.Add(New ByteArrayContent(File.ReadAllBytes(imagePath)), "file", Path.GetFileName(imagePath))
+            End If
 
             Dim response = Await httpClient.PostAsync(webhookUrl, multipartContent)
             If response.IsSuccessStatusCode Then
@@ -413,5 +508,8 @@ Public Class Form1
         SaveDataGridView()
     End Sub
 
+    Private Sub Compression_CheckedChanged(sender As Object, e As EventArgs) Handles Compression.CheckedChanged
+        SaveSettings("Compression", Compression.Checked.ToString())
+    End Sub
 End Class
 
