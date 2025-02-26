@@ -1,19 +1,27 @@
-﻿Imports System.IO
+﻿Imports System.Configuration
+Imports System.Drawing.Imaging
+Imports System.IO
 Imports System.Net.Http
+Imports System.Reflection
 Imports System.Text
 Imports System.Text.RegularExpressions
-Imports System.Configuration
 Imports Newtonsoft.Json
-Imports System.Reflection
-Imports System.Drawing
-Imports System.Drawing.Imaging
 
 Public Class Form1
     Private watcher As FileSystemWatcher
     Private httpClient As HttpClient = New HttpClient()
     Private currentLanguage As String = "ja" ' 言語の初期設定
+    Private appDataPath As String = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "VRChat_Screenshot_Discord")
+    Private configFilePath As String = Path.Combine(appDataPath, "VRChat_Screenshot_Discord.dll.config")
+    Private configMap As New ExeConfigurationFileMap() With {.ExeConfigFilename = configFilePath}
+    Private config As Configuration = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None)
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' AppDataフォルダの作成
+        If Not Directory.Exists(appDataPath) Then
+            Directory.CreateDirectory(appDataPath)
+        End If
+
         ' 言語設定を読み込み
         currentLanguage = LoadLanguageSelection()
         If String.IsNullOrEmpty(currentLanguage) Then
@@ -21,16 +29,13 @@ Public Class Form1
         End If
 
         ' 設定値の読み込み
-        TextBox1.Text = ConfigurationManager.AppSettings("FolderPath")
-        ' Compression チェックボックスの初期状態を設定
-        Dim compressionSetting As String = ConfigurationManager.AppSettings("Compression")
+        TextBox1.Text = config.AppSettings.Settings("FolderPath")?.Value
+        Dim compressionSetting As String = config.AppSettings.Settings("Compression")?.Value
         If String.IsNullOrEmpty(compressionSetting) Then
             Compression.Checked = True ' デフォルトでON
         Else
             Compression.Checked = Convert.ToBoolean(compressionSetting)
         End If
-        ' TextBox2 は削除されたため、DataGridView1 から WebhookUrl を取得するように変更
-        ' TextBox2.Text = ConfigurationManager.AppSettings("WebhookUrl")
 
         ' 言語リストをComboBoxに追加
         LoadLanguages()
@@ -177,7 +182,10 @@ Public Class Form1
     End Sub
 
     Private Sub SaveSettings(key As String, value As String)
-        Dim config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)
+        If Not Directory.Exists(appDataPath) Then
+            Directory.CreateDirectory(appDataPath)
+        End If
+
         If config.AppSettings.Settings(key) Is Nothing Then
             config.AppSettings.Settings.Add(key, value)
         Else
@@ -255,7 +263,7 @@ Public Class Form1
     End Sub
 
     Private Function LoadLanguageSelection() As String
-        Return ConfigurationManager.AppSettings("Language")
+        Return config.AppSettings.Settings("Language")?.Value
     End Function
 
     Private Async Sub ComboBoxLanguage_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBoxLanguage.SelectedIndexChanged
@@ -445,7 +453,7 @@ Public Class Form1
     End Function
 
     Private Sub LoadDataGridView()
-        Dim filePath As String = Path.Combine(Application.StartupPath, "DataGridViewData.json")
+        Dim filePath As String = Path.Combine(appDataPath, "DataGridViewData.json")
         Dim dataTable As New DataTable()
         ' DataTableの列を明示的に定義
         dataTable.Columns.Add("onoff", GetType(Boolean))
@@ -462,8 +470,6 @@ Public Class Form1
                 dataRow("WebHookURL") = Convert.ToString(row("WebHookURL"))
                 dataTable.Rows.Add(dataRow)
             Next
-        Else
-
         End If
 
         DataGridView1.DataSource = dataTable
@@ -474,6 +480,7 @@ Public Class Form1
         DataGridView1.Columns(1).AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
         DataGridView1.Columns(2).AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
     End Sub
+
 
     Private Sub SaveDataGridView()
         Dim dataTable As New DataTable()
@@ -491,7 +498,10 @@ Public Class Form1
             End If
         Next
         Dim jsonData As String = JsonConvert.SerializeObject(dataTable, Formatting.Indented)
-        Dim filePath As String = Path.Combine(Application.StartupPath, "DataGridViewData.json")
+        Dim filePath As String = Path.Combine(appDataPath, "DataGridViewData.json")
+        If Not Directory.Exists(appDataPath) Then
+            Directory.CreateDirectory(appDataPath)
+        End If
         File.WriteAllText(filePath, jsonData)
     End Sub
 
