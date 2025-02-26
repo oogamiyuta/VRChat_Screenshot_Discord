@@ -12,8 +12,8 @@
     <RepositoryUrl>https://github.com/oogamiyuta/VRChat_Screenshot_Discord.git</RepositoryUrl>
     <NeutralLanguage>ja-JP</NeutralLanguage>
     <Authors>大狼ユタ</Authors>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
